@@ -1,3 +1,6 @@
+stages:
+  - build
+
 variables:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
@@ -5,15 +8,14 @@ variables:
 before_script:
   - apt-get update && apt-get install -y tar
 
-jobs:
-  build:
-    stage: build
-    image: mcr.microsoft.com/dotnet/sdk:8.0
-    script:
-      - dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
-      - dotnet restore --no-cache
-      - dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableCompressionInSingleFile=true
-      - tar -czvf publish.tar.gz -C bin/Release/net8.0/linux-x64/publish/ .
-    artifacts:
-      paths:
-        - publish.tar.gz
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  script:
+    - dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
+    - dotnet restore --no-cache
+    - dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableCompressionInSingleFile=true
+    - tar -czvf publish.tar.gz -C bin/Release/net8.0/linux-x64/publish/ .
+  artifacts:
+    paths:
+      - publish.tar.gz
