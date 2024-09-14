@@ -10,7 +10,7 @@ env:
 jobs:
   release:
     name: check and build
-    runs-on: ubuntu-latest
+    runs-on: g7s
     steps:
       - uses: actions/checkout@v4
         with:
