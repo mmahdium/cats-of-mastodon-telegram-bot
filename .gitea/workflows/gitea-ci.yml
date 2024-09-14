@@ -1,22 +1,32 @@
-image: mcr.microsoft.com/dotnet/sdk:8.0
+name: release
+on:
+  push:
+    tags:
+      - "*"
+
+env:
+  ASPNETCORE_ENVIRONMENT: Production
 
 jobs:
-  build:
-    runs-on: g7s
+  release:
+    name: check and build
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup telegram.bot
-        run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build -c Release
-      - name: Publish
-        run: dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableCompressionInSingleFile=true
-      - name: Create artifact
-        run: tar -czvf publish.tar.gz publish
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - uses: actions/checkout@v4
         with:
-          name: publish.tar.gz
-          path: publish.tar.gz
+          fetch-depth: 0 # all history for all branches and tags
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install telegram bot library
+        run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
+      - name: dotnet restore
+        run: dotnet restore
+      - name: dotnet build
+        run: dotnet build --no-restore -c Release
+      - name: dotnet publish
+        run: |
+          pushd src
+          dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableCompressionInSingleFile=true
+          popd          
