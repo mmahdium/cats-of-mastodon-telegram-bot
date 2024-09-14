@@ -7,9 +7,11 @@ public class MastodonBot
 {
 
     private static Timer _timer;
-    
+
     private static async Task Main()
     {
+        DotNetEnv.Env.Load();
+
         // Configure logging
         using var loggerFactory = LoggerFactory.Create(builder =>
         {
@@ -17,8 +19,12 @@ public class MastodonBot
         });
         var logger = loggerFactory.CreateLogger<MastodonBot>();
 
+        if(!CheckEnv.IsValid()){
+            logger.LogCritical("Error reading envinonment variables, either some values are missing or no .env file was found");
+            throw new Exception("Error reading envinonment variables, either some values are missing or no .env file was found");
+        }
         // Setup DB
-        var db = await DbInitializer.SetupDb(Environment.GetEnvironmentVariable("DB_NAME"));
+        var db = await DbInitializer.SetupDb(DotNetEnv.Env.GetString("DB_NAME"));
         if (db == null)
         {
             logger.LogCritical("Unable to setup DB");
@@ -27,26 +33,31 @@ public class MastodonBot
         logger.LogInformation("DB setup done");
 
         // Setup bot
-        var bot = new TelegramBotClient(Environment.GetEnvironmentVariable("BOT_TOKEN"));
-        var me = await bot.GetMeAsync();
-        await bot.DropPendingUpdatesAsync();
-        logger.LogInformation($"Bot is running as {me.FirstName}.");
 
-        bot.OnUpdate += OnUpdate;
+            var bot = new TelegramBotClient(DotNetEnv.Env.GetString("BOT_TOKEN"));
 
-        // Handle bot updates
-        async Task OnUpdate(Update update)
-        {
-            switch (update)
+            var me = await bot.GetMeAsync();
+            await bot.DropPendingUpdatesAsync();
+            bot.OnUpdate += OnUpdate;
+
+            logger.LogInformation($"Bot is running as {me.FirstName}.");
+
+
+
+            // Handle bot updates
+            async Task OnUpdate(Update update)
             {
-                case { CallbackQuery: { } callbackQuery }: await HandlePostAction.HandleCallbackQuery(callbackQuery,db,bot, logger); break;
-                default: logger.LogInformation($"Received unhandled update {update.Type}"); break;
-            };
-        }
+                switch (update)
+                {
+                    case { CallbackQuery: { } callbackQuery }: await HandlePostAction.HandleCallbackQuery(callbackQuery, db, bot, logger); break;
+                    default: logger.LogInformation($"Received unhandled update {update.Type}"); break;
+                };
+            }
 
-        // Set a timer to fetch and process posts every 15 minutes
-        _timer = new Timer(async _ => await RunCheck.runAsync(db, bot, Environment.GetEnvironmentVariable("TAG"),logger,Environment.GetEnvironmentVariable("CUSTOM_INSTANCE")), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
-        Console.ReadLine();
+            // Set a timer to fetch and process posts every 15 minutes
+            _timer = new Timer(async _ => await RunCheck.runAsync(db, bot, DotNetEnv.Env.GetString("TAG"), logger, DotNetEnv.Env.GetString("CUSTOM_INSTANCE")), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
+            Console.ReadLine();
+        
 
     }
 

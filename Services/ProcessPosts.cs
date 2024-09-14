@@ -24,7 +24,7 @@ namespace mstdnCats.Services
                     // Send approve or reject message to admin
                     foreach (var media in post.MediaAttachments)
                     {
-                        await _bot.SendPhotoAsync(Environment.GetEnvironmentVariable("ADMIN_NUMID"), media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
+                        await _bot.SendPhotoAsync(DotNetEnv.Env.GetString("ADMIN_NUMID"), media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
                         , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.MediaId}").AddButton("Reject", $"reject-{media.MediaId}"));
 
                     }
