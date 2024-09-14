@@ -7,12 +7,13 @@ namespace mstdnCats.Services
     public sealed class PostResolver
     {
 
-        public static async Task<List<Post>?> GetPostsAsync(string tag, ILogger<MastodonBot>? logger, string instance = "https://haminoa.net")
+        public static async Task<List<Post>?> GetPostsAsync(string tag, ILogger<MastodonBot>? logger, string instance)
         {
             // Get posts
             HttpClient _httpClient = new HttpClient();
             // Get posts from mastodon api (40 latest posts)
-            var response = await _httpClient.GetAsync($"{instance}/api/v1/timelines/tag/{tag}?limit=40");
+            string requestUrl = $"{instance}/api/v1/timelines/tag/{tag}?limit=40";
+            var response = await _httpClient.GetAsync(requestUrl);
 
             // Print out ratelimit info
             logger?.LogInformation("Remaining requests: " + response.Headers.GetValues("X-RateLimit-Remaining").First() + "time to reset: " + response.Headers.GetValues("X-RateLimit-Reset").First());
