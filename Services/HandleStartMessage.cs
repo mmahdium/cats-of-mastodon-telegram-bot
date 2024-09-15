@@ -17,16 +17,22 @@ namespace CatsOfMastodonBot.Services
     {
         public static async Task HandleStartMessageAsync(Message message, TelegramBotClient _bot, IDocumentCollection<Post> _db, ILogger<MastodonBot>? logger)
         {
+            logger?.LogInformation("Start message received");
+            
             // choose all media attachments that are approved
-            var mediaAttachmentsToSelect = _db.AsQueryable().Where(p => p.MediaAttachments.Any(m => m.Approved == true)).ToList();
+            var mediaAttachmentsToSelect = _db.AsQueryable()
+                .Where(post => post.MediaAttachments.Any(media => media.Approved))
+                .ToList();
             // select random approved media attachment
             var selectedMediaAttachment = mediaAttachmentsToSelect[new Random().Next(mediaAttachmentsToSelect.Count)];
             // send media attachment
             await _bot.SendPhotoAsync(message.Chat.Id, selectedMediaAttachment.MediaAttachments.FirstOrDefault(m => m.Approved == true).Url,
-            caption: $"<a href=\"" + selectedMediaAttachment.Url + "\">" + $"Here is your cat!" + "</br>" + "View on Mastodon 🐈" + " </a>", parseMode: ParseMode.Html
+            caption: $"Here is your cat!🐈\n"+"<a href=\"" + selectedMediaAttachment.Url + "\">" + $"View on Mastodon " + " </a>", parseMode: ParseMode.Html
                         , replyMarkup: new InlineKeyboardMarkup().AddButton(InlineKeyboardButton.WithUrl("Join channel 😺", selectedMediaAttachment.Url))
                         .AddNewRow()
                         .AddButton(InlineKeyboardButton.WithCallbackData("Send me another one!", $"new_random")));
+            
+            logger?.LogInformation("Random cat sent!");
 
 
         }
