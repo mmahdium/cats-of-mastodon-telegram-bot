@@ -41,8 +41,9 @@ public class MastodonBot
 
         var me = await bot.GetMeAsync();
         await bot.DropPendingUpdatesAsync();
-        bot.OnUpdate += OnUpdate;
         bot.OnMessage += OnMessage;
+        bot.OnUpdate += OnUpdate;
+
 
         logger.LogInformation($"Bot is running as {me.FirstName}.");
 
@@ -52,8 +53,9 @@ public class MastodonBot
             switch (update)
             {
                 case { CallbackQuery: { } callbackQuery }: {
-                    if(callbackQuery.Data == "new_random") await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger);
-                    else await HandlePostAction.HandleCallbackQuery(callbackQuery, db, bot, logger); break;
+                    if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger); break;}
+
+                    else {await HandlePostAction.HandleCallbackQuery(callbackQuery, db, bot, logger); break;}
                    
                 }
                 default: logger.LogInformation($"Received unhandled update {update.Type}"); break;
@@ -70,7 +72,7 @@ public class MastodonBot
         }
 
         // Set a timer to fetch and process posts every 15 minutes
-        _timer = new Timer(async _ => await RunCheck.runAsync(db, bot, DotNetEnv.Env.GetString("TAG"), logger, DotNetEnv.Env.GetString("CUSTOM_INSTANCE")), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
+        //_timer = new Timer(async _ => await RunCheck.runAsync(db, bot, DotNetEnv.Env.GetString("TAG"), logger, DotNetEnv.Env.GetString("CUSTOM_INSTANCE")), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
         Console.ReadLine();
     }
 
