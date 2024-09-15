@@ -41,6 +41,7 @@ public class MastodonBot
 
         var me = await bot.GetMeAsync();
         await bot.DropPendingUpdatesAsync();
+        bot.OnMessage += OnMessage;
         bot.OnUpdate += OnUpdate;
 
 
@@ -49,19 +50,16 @@ public class MastodonBot
         // Handle bot updates
         async Task OnUpdate(Update update)
         {
-            if(update.Type == UpdateType.CallbackQuery){
-                if(update.CallbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(update.CallbackQuery.Message, bot, db, logger);}
+            switch (update)
+            {
+                case { CallbackQuery: { } callbackQuery }: {
+                    if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger); break;}
 
-                else {await HandlePostAction.HandleCallbackQuery(update.CallbackQuery, db, bot, logger); }
-            }
-            else if (update.Type == UpdateType.Message)
-            {
-                await OnMessage(update.Message, update.Type);
-            }
-            else
-            {
-                logger.LogInformation($"Received unhandled update {update.Type}");
-            }
+                    else {await HandlePostAction.HandleCallbackQuery(callbackQuery, db, bot, logger); break;}
+                   
+                }
+                default: logger.LogInformation($"Received unhandled update {update.Type}"); break;
+            };
         }
 
         // Handle bot messages
