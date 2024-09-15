@@ -41,7 +41,6 @@ public class MastodonBot
 
         var me = await bot.GetMeAsync();
         await bot.DropPendingUpdatesAsync();
-        bot.OnMessage += OnMessage;
         bot.OnUpdate += OnUpdate;
 
 
@@ -58,6 +57,7 @@ public class MastodonBot
                     else {await HandlePostAction.HandleCallbackQuery(callbackQuery, db, bot, logger); break;}
                    
                 }
+                case { Message: { } message }: await OnMessage(message, update.Type); break;
                 default: logger.LogInformation($"Received unhandled update {update.Type}"); break;
             };
         }
