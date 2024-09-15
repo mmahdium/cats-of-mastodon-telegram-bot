@@ -28,7 +28,7 @@ namespace CatsOfMastodonBot.Services
             // send media attachment
             await _bot.SendPhotoAsync(message.Chat.Id, selectedMediaAttachment.MediaAttachments.FirstOrDefault(m => m.Approved == true).Url,
             caption: $"Here is your cat!🐈\n"+"<a href=\"" + selectedMediaAttachment.Url + "\">" + $"View on Mastodon " + " </a>", parseMode: ParseMode.Html
-                        , replyMarkup: new InlineKeyboardMarkup().AddButton(InlineKeyboardButton.WithUrl("Join channel 😺", selectedMediaAttachment.Url))
+                        , replyMarkup: new InlineKeyboardMarkup().AddButton(InlineKeyboardButton.WithUrl("Join channel 😺", "https://t.me/catsofmastodon"))
                         .AddNewRow()
                         .AddButton(InlineKeyboardButton.WithCallbackData("Send me another one!", $"new_random")));
             
