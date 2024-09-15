@@ -8,7 +8,7 @@ I am not responsible for any misuse or unauthorized use of the scraped data. It 
 
 | Variable Name | Description | Default Value | Format |
 |---|---|---|---|
-| DB_NAME | Database file name | (Required) | Must end in *.json |
+| DB_NAME | Database file name | (Required) | Must not have any extension, plain text |
 | BOT_TOKEN | Telegram bot token | (Required) | Standard Telegram bot token format |
 | TAG | Mastodon timeline tag | (Required) | Text with no spaces |
 | CHANNEL_NUMID | Telegram channel number ID | (Required) | Telegram channel number ID format |
@@ -26,8 +26,8 @@ I am not responsible for any misuse or unauthorized use of the scraped data. It 
 
 ### Published Executable
 
-1. Download the published executable for your operating system from the project releases.
-2. Navigate to the directory containing the downloaded executable in your terminal.
+1. Download the published executable for `Linux-x86` from the [pipeline artifacts](https://gitlab.com/mahdium/cats-of-mastodon-telegram-bot/-/pipelines/latest)
+2. Navigate to the directory containing the downloaded archive in your terminal and extract the archive.
 
 **Providing Environment Variables:**
 
@@ -35,9 +35,9 @@ I am not responsible for any misuse or unauthorized use of the scraped data. It 
 1. Create a file named .env in the root directory of your project.
 2. Add each environment variable on a separate line in the format KEY=VALUE. For example:
 ```
-DB_NAME=my_data.json
+DB_NAME=my_data
 BOT_TOKEN=your_telegram_bot_token
-TAG=important_data
+TAG=mastodontimelinetag
 CHANNEL_NUMID=1234567890
 ADMIN_NUMID=9876543210
 ```
