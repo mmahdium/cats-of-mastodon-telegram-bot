@@ -73,7 +73,7 @@ public class MastodonBot
 
         // Set a timer to fetch and process posts every 15 minutes
         _timer = new Timer(async _ => await RunCheck.runAsync(db, bot, DotNetEnv.Env.GetString("TAG"), logger, DotNetEnv.Env.GetString("CUSTOM_INSTANCE")), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
-        //Console.ReadLine();
+        Console.ReadLine();
     }
 
 }
