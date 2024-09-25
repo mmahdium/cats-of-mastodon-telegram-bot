@@ -23,26 +23,27 @@ namespace mstdnCats.Services
                 if (!existingPosts.Contains(post.mstdnPostId) && post.MediaAttachments.Count > 0)
                 {
 
-                        // Send approve or reject message to admin
-                        foreach (var media in post.MediaAttachments)
+                    // Send approve or reject message to admin
+                    foreach (var media in post.MediaAttachments)
+                    {
+                        if (media.Type == "image")
                         {
                             try
                             {
                                 await _bot.SendPhotoAsync(DotNetEnv.Env.GetString("ADMIN_NUMID"), media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
                             , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.MediaId}").AddButton("Reject", $"reject-{media.MediaId}"));
- 
+
+                                // Insert post
+                                await _db.InsertOneAsync(post);
+                                newPosts++;
                             }
                             catch (System.Exception ex)
                             {
                                 logger?.LogError("Error while sending message to admin: " + ex.Message + " - Media URL: " + media.PreviewUrl);
                             }
-                           
                         }
+                    }
 
-
-                    // Insert post
-                    await _db.InsertOneAsync(post);
-                    newPosts++;
                 }
             }
 
