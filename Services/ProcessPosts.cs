@@ -11,6 +11,7 @@ namespace mstdnCats.Services
     {
         public static async Task<List<MediaAttachment>> checkAndInsertPostsAsync(IDocumentCollection<Post> _db, TelegramBotClient _bot, List<Post> fetchedPosts, ILogger<MastodonBot>? logger)
         {
+
             // Get existing posts
             var existingPosts = _db.AsQueryable().Select(x => x.mstdnPostId).ToArray();
             logger?.LogInformation($"Recieved posts to proccess: {fetchedPosts.Count} - total existing posts: {existingPosts.Length}");
@@ -21,13 +22,24 @@ namespace mstdnCats.Services
                 // Check if post already exists
                 if (!existingPosts.Contains(post.mstdnPostId) && post.MediaAttachments.Count > 0)
                 {
-                    // Send approve or reject message to admin
-                    foreach (var media in post.MediaAttachments)
-                    {
-                        await _bot.SendPhotoAsync(DotNetEnv.Env.GetString("ADMIN_NUMID"), media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
-                        , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.MediaId}").AddButton("Reject", $"reject-{media.MediaId}"));
 
-                    }
+                        // Send approve or reject message to admin
+                        foreach (var media in post.MediaAttachments)
+                        {
+                            try
+                            {
+                                await _bot.SendPhotoAsync(DotNetEnv.Env.GetString("ADMIN_NUMID"), media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
+                            , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.MediaId}").AddButton("Reject", $"reject-{media.MediaId}"));
+ 
+                            }
+                            catch (System.Exception ex)
+                            {
+                                logger?.LogError("Error while sending message to admin: " + ex.Message + " - Media URL: " + media.PreviewUrl);
+                            }
+                           
+                        }
+
+
                     // Insert post
                     await _db.InsertOneAsync(post);
                     newPosts++;

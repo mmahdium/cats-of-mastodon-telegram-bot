@@ -37,9 +37,17 @@ namespace mstdnCats.Services
                 var mediaAttachment = post.MediaAttachments.FirstOrDefault(m => m.MediaId == mediaId);
                 if (mediaAttachment != null)
                 {
+                    // Check if the media attachment is already approved
+                    bool isAlreadyApproved = mediaAttachment.Approved;
+                    if (isAlreadyApproved){
+                        await _bot.AnswerCallbackQueryAsync(callbackQuery.Id, "Media attachment is already approved.",true);
+                        return;
+                    }
+                    
                     mediaAttachment.Approved = true;
 
                     bool updated = await _db.UpdateOneAsync(p => p.mstdnPostId == post.mstdnPostId, post);
+                    
 
                     if (updated)
                     {
