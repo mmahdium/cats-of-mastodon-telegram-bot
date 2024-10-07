@@ -13,7 +13,7 @@ namespace mstdnCats.Services
     {
         public static async Task HandleCallbackQuery(CallbackQuery callbackQuery, IDocumentCollection<Post> _db, TelegramBotClient _bot, ILogger<MastodonBot>? logger)
         {
-            var config = new configData.config();
+            var config = configData.fetchData();
             
             // Extract media ID from callback query data
             string[] parts = callbackQuery.Data.Split('-');

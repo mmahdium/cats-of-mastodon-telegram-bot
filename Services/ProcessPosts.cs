@@ -12,7 +12,7 @@ namespace mstdnCats.Services
     {
         public static async Task<List<MediaAttachment>> checkAndInsertPostsAsync(IDocumentCollection<Post> _db, TelegramBotClient _bot, List<Post> fetchedPosts, ILogger<MastodonBot>? logger)
         {
-            var config = new configData.config();
+            var config = configData.fetchData();
 
             // Get existing posts
             var existingPosts = _db.AsQueryable().Select(x => x.mstdnPostId).ToArray();

@@ -3,7 +3,7 @@ namespace CatsOfMastodonBot.Models
     public class configData
     {
 
-        public static Boolean fetchData()
+        public static config fetchData()
         {
             // Load from .env file first
             DotNetEnv.Env.Load();
@@ -20,7 +20,7 @@ namespace CatsOfMastodonBot.Models
             if (string.IsNullOrEmpty(dbName) || string.IsNullOrEmpty(botToken) || string.IsNullOrEmpty(tag)
                 || string.IsNullOrEmpty(channelNumId) || string.IsNullOrEmpty(adminNumId))
             {
-                return false; // Failure if any are missing
+                return null; // Failure if any are missing
             }
 
             // If all required variables are present, assign to the config
@@ -33,7 +33,7 @@ namespace CatsOfMastodonBot.Models
                 ADMIN_NUMID = adminNumId
             };
 
-            return true; // Success
+            return config; // Success
         }
 
         public class config
