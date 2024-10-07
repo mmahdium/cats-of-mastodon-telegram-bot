@@ -8,8 +8,6 @@ using Telegram.Bot.Types.Enums;
 
 public class MastodonBot
 {
-
-
     private static Timer _timer;
 
     private static async Task Main()
@@ -23,13 +21,15 @@ public class MastodonBot
         });
         var logger = loggerFactory.CreateLogger<MastodonBot>();
 
-        if (!configData.fetchData())
+        var config = configData.fetchData();
+        if (config==null)
         {
             logger.LogCritical("Error reading envinonment variables, either some values are missing or no .env file was found");
             throw new Exception("Error reading envinonment variables, either some values are missing or no .env file was found");
         }
-        var config = new configData.config();
+        
         // Setup DB
+        Console.WriteLine("DB name: " + config.DB_NAME);
         var db = await DbInitializer.SetupDb(config.DB_NAME);
         if (db == null)
         {
