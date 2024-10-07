@@ -1,3 +1,4 @@
+using CatsOfMastodonBot.Models;
 using JsonFlatFileDataStore;
 using Microsoft.Extensions.Logging;
 using mstdnCats.Models;
@@ -11,6 +12,7 @@ namespace mstdnCats.Services
     {
         public static async Task<List<MediaAttachment>> checkAndInsertPostsAsync(IDocumentCollection<Post> _db, TelegramBotClient _bot, List<Post> fetchedPosts, ILogger<MastodonBot>? logger)
         {
+            var config = new configData.config();
 
             // Get existing posts
             var existingPosts = _db.AsQueryable().Select(x => x.mstdnPostId).ToArray();
@@ -30,7 +32,7 @@ namespace mstdnCats.Services
                         {
                             try
                             {
-                                await _bot.SendPhotoAsync(DotNetEnv.Env.GetString("ADMIN_NUMID"), media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
+                                await _bot.SendPhotoAsync(config.ADMIN_NUMID, media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
                             , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.MediaId}").AddButton("Reject", $"reject-{media.MediaId}"));
 
                                 // Insert post

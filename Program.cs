@@ -1,4 +1,5 @@
-﻿using CatsOfMastodonBot.Services;
+﻿using CatsOfMastodonBot.Models;
+using CatsOfMastodonBot.Services;
 using Microsoft.Extensions.Logging;
 using mstdnCats.Services;
 using Telegram.Bot;
@@ -8,11 +9,12 @@ using Telegram.Bot.Types.Enums;
 public class MastodonBot
 {
 
+
     private static Timer _timer;
 
     private static async Task Main()
     {
-        DotNetEnv.Env.Load();
+        
 
         // Configure logging
         using var loggerFactory = LoggerFactory.Create(builder =>
@@ -21,13 +23,14 @@ public class MastodonBot
         });
         var logger = loggerFactory.CreateLogger<MastodonBot>();
 
-        if (!CheckEnv.IsValid())
+        if (!configData.fetchData())
         {
             logger.LogCritical("Error reading envinonment variables, either some values are missing or no .env file was found");
             throw new Exception("Error reading envinonment variables, either some values are missing or no .env file was found");
         }
+        var config = new configData.config();
         // Setup DB
-        var db = await DbInitializer.SetupDb(DotNetEnv.Env.GetString("DB_NAME"));
+        var db = await DbInitializer.SetupDb(config.DB_NAME);
         if (db == null)
         {
             logger.LogCritical("Unable to setup DB");
@@ -37,7 +40,7 @@ public class MastodonBot
 
         // Setup bot
 
-        var bot = new TelegramBotClient(DotNetEnv.Env.GetString("BOT_TOKEN"));
+        var bot = new TelegramBotClient(config.BOT_TOKEN);
 
         var me = await bot.GetMeAsync();
         await bot.DropPendingUpdatesAsync();
@@ -72,8 +75,12 @@ public class MastodonBot
         }
 
         // Set a timer to fetch and process posts every 15 minutes
-        _timer = new Timer(async _ => await RunCheck.runAsync(db, bot, DotNetEnv.Env.GetString("TAG"), logger, DotNetEnv.Env.GetString("CUSTOM_INSTANCE")), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
+        _timer = new Timer(async _ => await RunCheck.runAsync(db, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
         Console.ReadLine();
     }
 
+}
+
+internal class ConfigData
+{
 }
