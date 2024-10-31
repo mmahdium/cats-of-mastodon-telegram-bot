@@ -24,8 +24,8 @@ public class MastodonBot
         var config = configData.fetchData();
         if (config==null)
         {
-            logger.LogCritical("Error reading envinonment variables, either some values are missing or no .env file was found");
-            throw new Exception("Error reading envinonment variables, either some values are missing or no .env file was found");
+            logger.LogCritical("Error reading environment variables, either some values are missing or no .env file was found");
+            throw new Exception("Error reading environment variables, either some values are missing or no .env file was found");
         }
         
         // Setup DB
@@ -47,7 +47,7 @@ public class MastodonBot
         bot.OnMessage += OnMessage;
         bot.OnUpdate += OnUpdate;
 
-
+        logger.LogInformation("Setup complete");
         logger.LogInformation($"Bot is running as {me.FirstName}.");
 
         // Handle bot updates
@@ -79,8 +79,4 @@ public class MastodonBot
         Console.ReadLine();
     }
 
-}
-
-internal class ConfigData
-{
 }
