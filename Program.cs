@@ -87,8 +87,7 @@ public class MastodonBot
         _timer = new Timer(async _ => await RunCheck.runAsync(db, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
         // Another timer to automatically backup the DB every 1 hour
         _timer = new Timer(async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db), null, TimeSpan.Zero, TimeSpan.FromHours(1));
-        // Close at Q
-        while (Console.ReadKey().KeyChar != 'q') { }
+        
     }
 
 }
