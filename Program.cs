@@ -72,10 +72,21 @@ public class MastodonBot
             {
                 await HandleStartMessage.HandleStartMessageAsync(message,bot, db, logger);
             }
+            else if (message.Text == "/backup")
+            {
+                await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db);
+            }
+            else
+            {
+                // Send a help message to prompt user to send /start and recieve their cat photo
+                await bot.SendTextMessageAsync(message.Chat.Id, "Send /start to get a random cat!");
+            }
         }
 
         // Set a timer to fetch and process posts every 15 minutes
         _timer = new Timer(async _ => await RunCheck.runAsync(db, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
+        // Another timer to automatically backup the DB every 1 hour
+        _timer = new Timer(async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db), null, TimeSpan.Zero, TimeSpan.FromHours(1));
         Console.ReadLine();
     }
 
