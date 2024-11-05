@@ -59,7 +59,7 @@ namespace mstdnCats.Services
                         , replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithUrl("View on Mastodon", post.Url)));
 
                         await _bot.AnswerCallbackQuery(callbackQuery.Id, "Media attachment approved and sent to channel.");
-                        await _bot.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+                        await _bot.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
 
                         logger?.LogTrace($"Media attachment {mediaId} approved.");
 
@@ -84,7 +84,7 @@ namespace mstdnCats.Services
                 if (post.MediaAttachments.Count == 1 && post.MediaAttachments.First().MediaId == mediaId)
                 {
                     await _bot.AnswerCallbackQuery(callbackQuery.Id, "Post has only one attachment. No deletion performed.");
-                    await _bot.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+                    await _bot.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
 
                     logger?.LogTrace($"Post {post.mstdnPostId} has only one attachment. No deletion performed.");
                 }
@@ -93,7 +93,7 @@ namespace mstdnCats.Services
                     post.MediaAttachments.RemoveAll(m => m.MediaId == mediaId);
                     await _db.UpdateOneAsync(p => p.mstdnPostId == post.mstdnPostId, post);
                     await _bot.AnswerCallbackQuery(callbackQuery.Id, "Media attachment rejected.");
-                    await _bot.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+                    await _bot.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
 
                     logger?.LogTrace($"Media attachment {mediaId} removed from post {post.mstdnPostId}.");
                 }
