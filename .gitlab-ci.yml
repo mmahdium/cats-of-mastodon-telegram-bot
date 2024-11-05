@@ -14,8 +14,8 @@ build:
   script:
     - dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
     - dotnet restore --no-cache
-    - dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableCompressionInSingleFile=true
-    - tar -czvf publish.tar.gz -C bin/Release/net8.0/linux-x64/publish/ .
+    - dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:EnableCompressionInSingleFile=true
+    - tar -czvf publish.tar.gz -C bin/Release/net9.0/linux-x64/publish/ .
   artifacts:
     paths:
       - publish.tar.gz
