@@ -14,7 +14,7 @@ namespace CatsOfMastodonBot.Models
             string tag = DotNetEnv.Env.GetString("TAG") ?? Environment.GetEnvironmentVariable("TAG");
             string channelNumId = DotNetEnv.Env.GetString("CHANNEL_NUMID") ?? Environment.GetEnvironmentVariable("CHANNEL_NUMID");
             string adminNumId = DotNetEnv.Env.GetString("ADMIN_NUMID") ?? Environment.GetEnvironmentVariable("ADMIN_NUMID");
-            string instance = DotNetEnv.Env.GetString("INSTANCE") ?? Environment.GetEnvironmentVariable("INSTANCE");
+            string? instance = DotNetEnv.Env.GetString("INSTANCE") ?? Environment.GetEnvironmentVariable("INSTANCE");
 
             // Check if any of the values are still null or empty
             if (string.IsNullOrEmpty(dbName) || string.IsNullOrEmpty(botToken) || string.IsNullOrEmpty(tag)

@@ -42,8 +42,8 @@ public class MastodonBot
 
         var bot = new TelegramBotClient(config.BOT_TOKEN);
 
-        var me = await bot.GetMeAsync();
-        await bot.DropPendingUpdatesAsync();
+        var me = await bot.GetMe();
+        await bot.DropPendingUpdates();
         bot.OnMessage += OnMessage;
         bot.OnUpdate += OnUpdate;
 
@@ -56,7 +56,7 @@ public class MastodonBot
             switch (update)
             {
                 case { CallbackQuery: { } callbackQuery }: {
-                    if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger); break;}
+                    if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger,callbackQuery); break;}
 
                     else {await HandlePostAction.HandleCallbackQuery(callbackQuery, db, bot, logger); break;}
                    
@@ -79,7 +79,7 @@ public class MastodonBot
             else
             {
                 // Send a help message to prompt user to send /start and recieve their cat photo
-                await bot.SendTextMessageAsync(message.Chat.Id, "Send /start to get a random cat!");
+                await bot.SendMessage(message.Chat.Id, "Send /start to get a random cat!");
             }
         }
 

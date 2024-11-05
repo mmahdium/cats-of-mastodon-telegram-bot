@@ -32,7 +32,7 @@ namespace mstdnCats.Services
                         {
                             try
                             {
-                                await _bot.SendPhotoAsync(config.ADMIN_NUMID, media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
+                                await _bot.SendPhoto(config.ADMIN_NUMID, media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
                             , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.MediaId}").AddButton("Reject", $"reject-{media.MediaId}"));
 
                                 // Insert post

@@ -9,12 +9,11 @@ namespace mstdnCats.Services
         {
             // Setup DB
             IDocumentCollection<Post>? collection = null;
-            if (_dbname != null)
-            {
+
                 try
                 {
                     // Initialize DB
-                    var store = new DataStore($"{_dbname}.json", minifyJson: false);
+                    var store = new DataStore($"{_dbname}.json", minifyJson: true);
                     collection = store.GetCollection<Post>();
                 }
                 catch
@@ -24,8 +23,6 @@ namespace mstdnCats.Services
 
                 // Return collection
                 return Task.FromResult(collection);
-            }
-            return Task.FromResult(collection);
         }
     }
 }
