@@ -12,7 +12,7 @@ namespace CatsOfMastodonBot.Services
     {
         public static async Task HandleStartMessageAsync(Message message, TelegramBotClient _bot, IDocumentCollection<Post> _db, ILogger<MastodonBot>? logger, CallbackQuery callbackQuery = null)
         {
-            logger?.LogInformation("Start message received");
+            logger?.LogInformation("Start message received, trigger source: " + (callbackQuery != null ? "Callback" : "Start command"));
 
             // choose all media attachments that are approved
             var mediaAttachmentsToSelect = _db.AsQueryable()
@@ -21,14 +21,16 @@ namespace CatsOfMastodonBot.Services
             // select random approved media attachment
             var selectedMediaAttachment = mediaAttachmentsToSelect[new Random().Next(mediaAttachmentsToSelect.Count)];
             // send media attachment
-            await _bot.SendPhoto(callbackQuery.Message.Chat.Id, selectedMediaAttachment.MediaAttachments.FirstOrDefault(m => m.Approved == true).Url,
+            await _bot.SendPhoto(message.Chat.Id, selectedMediaAttachment.MediaAttachments.FirstOrDefault(m => m.Approved == true).Url,
             caption: $"Here is your cat!🐈\n" + "<a href=\"" + selectedMediaAttachment.Url + "\">" + $"View on Mastodon " + " </a>", parseMode: ParseMode.Html
                         , replyMarkup: new InlineKeyboardMarkup().AddButton(InlineKeyboardButton.WithUrl("Join channel 😺", "https://t.me/catsofmastodon"))
                         .AddNewRow()
                         .AddButton(InlineKeyboardButton.WithCallbackData("Send me another one!", $"new_random")));
+
+            // answer callback query from "send me another cat" button
             if (callbackQuery != null)
             {
-                await _bot.AnswerCallbackQuery(callbackQuery.Id, "Catch your cat!", url: selectedMediaAttachment.Url);
+                await _bot.AnswerCallbackQuery(callbackQuery.Id, "Catch your cat! 😺");
             }
             logger?.LogInformation("Random cat sent!");
 
