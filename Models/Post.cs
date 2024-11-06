@@ -26,6 +26,8 @@ namespace mstdnCats.Models
         public required string Acct { get; set; }
         [JsonPropertyName("display_name")]
         public required string DisplayName { get; set; }
+        [JsonPropertyName("bot")]
+        public required Boolean IsBot { get; set; }
         [JsonPropertyName("url")]
         public required string Url { get; set; }
         [JsonPropertyName("avatar_static")]

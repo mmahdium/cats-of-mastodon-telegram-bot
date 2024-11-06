@@ -22,7 +22,7 @@ namespace mstdnCats.Services
             foreach (Post post in fetchedPosts)
             {
                 // Check if post already exists
-                if (!existingPosts.Contains(post.mstdnPostId) && post.MediaAttachments.Count > 0)
+                if (!existingPosts.Contains(post.mstdnPostId) && post.MediaAttachments.Count > 0 && post.Account.IsBot == false)
                 {
 
                     // Send approve or reject message to admin
