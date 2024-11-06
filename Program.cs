@@ -76,10 +76,10 @@ public class MastodonBot
             {
                 await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db);
             }
-            else
+            // Send a message to prompt user to send /start and recieve their cat photo only if its from a telegram user and not a channel
+            else if (message.Chat.Type == ChatType.Private)
             {
-                // Send a help message to prompt user to send /start and recieve their cat photo
-                await bot.SendMessage(message.Chat.Id, "Send /start to get a random cat!");
+                await HandleStartMessage.HandleStartMessageAsync(message, bot, db, logger);
             }
         }
 
