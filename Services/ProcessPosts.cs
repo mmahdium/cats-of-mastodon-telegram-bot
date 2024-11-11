@@ -25,6 +25,7 @@ namespace mstdnCats.Services
                 if (!existingPosts.Contains(post.mstdnPostId) && post.MediaAttachments.Count > 0 && post.Account.IsBot == false)
                 {
 
+
                     // Send approve or reject message to admin
                     foreach (var media in post.MediaAttachments)
                     {
@@ -35,9 +36,6 @@ namespace mstdnCats.Services
                                 await _bot.SendPhoto(config.ADMIN_NUMID, media.PreviewUrl, caption: $"<a href=\"" + post.Url + "\"> Mastodon </a>", parseMode: ParseMode.Html
                             , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.MediaId}").AddButton("Reject", $"reject-{media.MediaId}"));
 
-                                // Insert post
-                                await _db.InsertOneAsync(post);
-                                newPosts++;
                             }
                             catch (System.Exception ex)
                             {
@@ -45,11 +43,14 @@ namespace mstdnCats.Services
                             }
                         }
                     }
+                    // Insert post
+                    await _db.InsertOneAsync(post);
+                    newPosts++;
 
                 }
             }
 
-            logger?.LogInformation($"Proccesing done, stats: received {fetchedPosts.Count} posts, inserted {newPosts} new posts.");
+            logger?.LogInformation($"Proccesing done, stats: received {fetchedPosts.Count} posts, inserted and sent {newPosts} new posts.");
 
             // Return list of media attachments
             var alldbpostsattachmentlist = _db.AsQueryable().SelectMany(x => x.MediaAttachments).ToList();
