@@ -26,7 +26,7 @@ I am not responsible for any misuse or unauthorized use of the scraped data. It 
 
 ### Published Executable
 
-1. Download the published executable for `Linux-x86` from the [pipeline artifacts](https://gitlab.com/mahdium/cats-of-mastodon-telegram-bot/-/pipelines/latest)
+1. Download the published executable for `Linux-x86` from the [pipeline artifacts](https://gitlab.com/api/v4/projects/61685511/jobs/artifacts/main/raw/publish.tar.gz?job=build)
 2. Navigate to the directory containing the downloaded archive in your terminal and extract the archive.
 
 **Providing Environment Variables:**
