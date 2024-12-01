@@ -13,7 +13,7 @@ namespace mstdnCats.Services
             //try
             //{
                 // First get posts
-                var posts = await PostResolver.GetPostsAsync(_tag, logger, _instance??"https://haminoa.net");
+                var posts = await PostResolver.GetPostsAsync(_tag, logger, _instance);
 
                 if (posts == null)
                 {
