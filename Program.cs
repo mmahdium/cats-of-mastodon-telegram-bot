@@ -48,7 +48,7 @@ public class MastodonBot
         bot.OnUpdate += OnUpdate;
 
         logger.LogInformation("Setup complete");
-        logger.LogInformation($"Bot is running as {me.FirstName}.");
+        logger.LogInformation($"Bot is running as {me.FirstName} - instance: {config.INSTANCE}");
 
         // Handle bot updates
         async Task OnUpdate(Update update)
@@ -84,9 +84,9 @@ public class MastodonBot
         }
 
         // Set a timer to fetch and process posts every 15 minutes
-        _postFetchTimer = new Timer(async _ => await RunCheck.runAsync(db, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
+        _postFetchTimer = new Timer(async _ => await RunCheck.runAsync(db, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
         // Another timer to automatically backup the DB every 1 hour
-        _backupTimer = new Timer(async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db), null, TimeSpan.Zero, TimeSpan.FromHours(1));
+        _backupTimer = new Timer(async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db), null, TimeSpan.Zero, TimeSpan.FromHours(6));
         // Keep the bot running
         await Task.Delay(-1);
     }
