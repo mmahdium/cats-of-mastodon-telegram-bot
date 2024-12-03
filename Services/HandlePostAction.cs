@@ -45,8 +45,7 @@ namespace mstdnCats.Services
                 if (mediaAttachment != null)
                 {
                     // Check if the media attachment is already approved
-                    bool isAlreadyApproved = mediaAttachment.Approved;
-                    if (isAlreadyApproved){
+                    if (mediaAttachment.Approved){
                         await _bot.AnswerCallbackQuery(callbackQuery.Id, "Media attachment is already approved.",true);
                         return;
                     }
@@ -58,15 +57,25 @@ namespace mstdnCats.Services
 
                     if (updated)
                     {
-                        // Send the media attachment to the channel
-                        await _bot.SendPhoto(config.CHANNEL_NUMID, allMediaAttachments.First(m => m.MediaId == mediaId).Url, caption: $"Post from " + $"<a href=\"" + post.Account.Url + "\">" + post.Account.DisplayName + " </a>", parseMode: ParseMode.Html
-                        , replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithUrl("View on Mastodon", post.Url)));
+                        try
+                        {
+                            // Send the media attachment to the channel
+                            await _bot.SendPhoto(config.CHANNEL_NUMID,
+                                allMediaAttachments.First(m => m.MediaId == mediaId).Url,
+                                caption: $"Post from " + $"<a href=\"" + post.Account.Url + "\">" +
+                                         post.Account.DisplayName + " </a>", parseMode: ParseMode.Html
+                                , replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithUrl("View on Mastodon", post.Url)));
 
-                        await _bot.AnswerCallbackQuery(callbackQuery.Id, "Media attachment approved and sent to channel.");
-                        await _bot.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
+                            await _bot.AnswerCallbackQuery(callbackQuery.Id,
+                                "Media attachment approved and sent to channel.");
+                            await _bot.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
 
-                        logger?.LogTrace($"Media attachment {mediaId} approved.");
-
+                            logger?.LogTrace($"Media attachment {mediaId} approved.");
+                        }
+                        catch (Exception e)
+                        {
+                            logger?.LogError($"Error while sending image to the channel:{e}");
+                        }
                     }
                     else
                     {
