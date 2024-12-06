@@ -1,6 +1,6 @@
 namespace CatsOfMastodonBot.Models
 {
-    public class configData
+    public class ConfigData
     {
 
         public static config fetchData()
@@ -10,6 +10,7 @@ namespace CatsOfMastodonBot.Models
 
             // Fetch values from .env file or environment variables (fall back)
             string dbName = DotNetEnv.Env.GetString("DB_NAME") ?? Environment.GetEnvironmentVariable("DB_NAME");
+            string mongoDbConnectionString = DotNetEnv.Env.GetString("MONGODB_CONNECTION_STRING") ?? Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING");
             string botToken = DotNetEnv.Env.GetString("BOT_TOKEN") ?? Environment.GetEnvironmentVariable("BOT_TOKEN");
             string tag = DotNetEnv.Env.GetString("TAG") ?? Environment.GetEnvironmentVariable("TAG");
             string channelNumId = DotNetEnv.Env.GetString("CHANNEL_NUMID") ?? Environment.GetEnvironmentVariable("CHANNEL_NUMID");

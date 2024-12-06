@@ -21,7 +21,7 @@ public class MastodonBot
         });
         var logger = loggerFactory.CreateLogger<MastodonBot>();
 
-        var config = configData.fetchData();
+        var config = ConfigData.fetchData();
         if (config==null)
         {
             logger.LogCritical("Error reading environment variables, either some values are missing or no .env file was found");
