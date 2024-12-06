@@ -30,12 +30,13 @@ public class MastodonBot
         
         // Setup DB
         Console.WriteLine("DB name: " + config.DB_NAME);
-        var db = await DbInitializer.SetupDb(config.DB_NAME);
-        if (db == null)
+        var backupDb = await DbInitializer.SetupJsonDb(config.DB_NAME);
+        if (backupDb == null)
         {
-            logger.LogCritical("Unable to setup DB");
-            throw new Exception("Unable to setup DB");
+            logger.LogCritical("Unable to setup json DB");
+            throw new Exception("Unable to setup json DB");
         }
+        var db = await DbInitializer.SetupDb(config.MONGODB_CONNECTION_STRING, config.DB_NAME);
         logger.LogInformation("DB setup done");
 
         // Setup bot
@@ -56,9 +57,9 @@ public class MastodonBot
             switch (update)
             {
                 case { CallbackQuery: { } callbackQuery }: {
-                    if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger,callbackQuery); break;}
+                    if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, backupDb, logger,callbackQuery); break;}
 
-                    else {await HandlePostAction.HandleCallbackQuery(callbackQuery, db, bot, logger); break;}
+                    else {await HandlePostAction.HandleCallbackQuery(callbackQuery, backupDb, bot, logger); break;}
                    
                 }
                 default: logger.LogInformation($"Received unhandled update {update.Type}"); break;
@@ -70,23 +71,23 @@ public class MastodonBot
         {
             if (message.Text == "/start")
             {
-                await HandleStartMessage.HandleStartMessageAsync(message,bot, db, logger);
+                await HandleStartMessage.HandleStartMessageAsync(message,bot, backupDb, logger);
             }
             else if (message.Text == "/backup")
             {
-                await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db);
+                await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, backupDb);
             }
             // Send a message to prompt user to send /start and recieve their cat photo only if its from a telegram user and not a channel
             else if (message.Chat.Type == ChatType.Private)
             {
-                await HandleStartMessage.HandleStartMessageAsync(message, bot, db, logger);
+                await HandleStartMessage.HandleStartMessageAsync(message, bot, backupDb, logger);
             }
         }
 
         // Set a timer to fetch and process posts every 15 minutes
-        _postFetchTimer = new Timer(async _ => await RunCheck.runAsync(db, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
+        _postFetchTimer = new Timer(async _ => await RunCheck.runAsync(backupDb, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
         // Another timer to automatically backup the DB every 1 hour
-        _backupTimer = new Timer(async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db), null, TimeSpan.Zero, TimeSpan.FromHours(6));
+        _backupTimer = new Timer(async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, backupDb), null, TimeSpan.Zero, TimeSpan.FromHours(6));
         // Keep the bot running
         await Task.Delay(-1);
     }

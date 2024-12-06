@@ -9,7 +9,7 @@ namespace CatsOfMastodonBot.Models
             DotNetEnv.Env.Load();
 
             // Fetch values from .env file or environment variables (fall back)
-            string dbName = DotNetEnv.Env.GetString("DB_NAME") ?? Environment.GetEnvironmentVariable("DB_NAME");
+            string dbName = DotNetEnv.Env.GetString("DB_NAME") ?? Environment.GetEnvironmentVariable("DB_NAME") ?? "catsofmastodon";
             string mongoDbConnectionString = DotNetEnv.Env.GetString("MONGODB_CONNECTION_STRING") ?? Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING");
             string botToken = DotNetEnv.Env.GetString("BOT_TOKEN") ?? Environment.GetEnvironmentVariable("BOT_TOKEN");
             string tag = DotNetEnv.Env.GetString("TAG") ?? Environment.GetEnvironmentVariable("TAG");
@@ -18,7 +18,7 @@ namespace CatsOfMastodonBot.Models
             string instance = DotNetEnv.Env.GetString("CUSTOM_INSTANCE") ?? Environment.GetEnvironmentVariable("CUSTOM_INSTANCE") ?? "https://haminoa.net";
 
             // Check if any of the values are still null or empty
-            if (string.IsNullOrEmpty(dbName) || string.IsNullOrEmpty(botToken) || string.IsNullOrEmpty(tag)
+            if (string.IsNullOrEmpty(botToken) || string.IsNullOrEmpty(tag)
                 || string.IsNullOrEmpty(channelNumId) || string.IsNullOrEmpty(adminNumId))
             {
                 return null; // Failure if any are missing
@@ -28,6 +28,7 @@ namespace CatsOfMastodonBot.Models
             config config = new config
             {
                 DB_NAME = dbName,
+                MONGODB_CONNECTION_STRING = mongoDbConnectionString,
                 BOT_TOKEN = botToken,
                 TAG = tag,
                 CHANNEL_NUMID = channelNumId,
@@ -46,6 +47,7 @@ namespace CatsOfMastodonBot.Models
             public string CHANNEL_NUMID { get; set; }
             public string ADMIN_NUMID { get; set; }
             public string INSTANCE { get; set; }
+            public string MONGODB_CONNECTION_STRING { get; set; }
         }
     }
 }
