@@ -1,48 +1,24 @@
-using JsonFlatFileDataStore;
 using MongoDB.Driver;
 using mstdnCats.Models;
 
-namespace mstdnCats.Services
+namespace mstdnCats.Services;
+
+public class DbInitializer
 {
-    public class DbInitializer
+
+    public static Task<IMongoCollection<Post>> SetupDb(string mongoDbConnectionString, string dbName)
     {
-        public static Task<IDocumentCollection<Post>> SetupJsonDb(string _dbname)
+        if (mongoDbConnectionString == null) throw new Exception("MongoDb connection string is null");
+
+        try
         {
-            // Setup DB
-            IDocumentCollection<Post>? collection = null;
-
-            try
-            {
-                // Initialize Backup DB
-                var store = new DataStore($"./data/{_dbname + "_BK"}.json", minifyJson: true);
-                collection = store.GetCollection<Post>();
-            }
-            catch
-            {
-                return Task.FromResult<IDocumentCollection<Post>>(null);
-            }
-
-            // Return collection
-            return Task.FromResult(collection);
+            var client = new MongoClient(mongoDbConnectionString);
+            var database = client.GetDatabase(dbName).GetCollection<Post>("posts");
+            return Task.FromResult(database);
         }
-
-        public static Task<IMongoCollection<Post>> SetupDb(string mongoDbConnectionString, string dbName)
+        catch (Exception ex)
         {
-            if (mongoDbConnectionString == null)
-            {
-                throw new Exception("MongoDb connection string is null");
-            }
-
-            try
-            {
-                var client = new MongoClient(mongoDbConnectionString);
-                var database = client.GetDatabase(dbName).GetCollection<Post>("posts");
-                return Task.FromResult(database);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error while connecting to MongoDB: " + ex.Message);
-            }
+            throw new Exception("Error while connecting to MongoDB: " + ex.Message);
         }
     }
 }
