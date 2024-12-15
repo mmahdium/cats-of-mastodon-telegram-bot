@@ -14,7 +14,7 @@ public class HandleDbBackup
     {
         logger?.LogInformation("Backup requested");
         
-        // Retrieve all posts from DB
+        // Retrieve all posts from DB (Exclude _id field from mongoDB since it is not needed nor implemented in Post model)
         var posts = _db.AsQueryable().ToList();
         // Retrieve all existing posts in backup DB
         var existingPosts = _bkDb.AsQueryable().ToList();

@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using Telegram.Bot.Types;
 
 
 namespace mstdnCats.Models
 {
+    [BsonIgnoreExtraElements]
     public class Post
     {
         [JsonPropertyName("id")]
