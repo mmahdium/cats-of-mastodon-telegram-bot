@@ -1,6 +1,7 @@
 using JsonFlatFileDataStore;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using mstdnCats.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -16,9 +17,9 @@ namespace CatsOfMastodonBot.Services
             logger?.LogInformation("Start message received, trigger source: " + (callbackQuery != null ? "Callback" : "Start command"));
 
             // choose all media attachments that are approved
-            var mediaAttachmentsToSelect = _db.AsQueryable()
+            var mediaAttachmentsToSelect =await _db.AsQueryable()
                 .Where(post => post.MediaAttachments.Any(media => media.Approved))
-                .ToList();
+                .ToListAsync();
             // select random approved media attachment
             var selectedMediaAttachment = mediaAttachmentsToSelect[new Random().Next(mediaAttachmentsToSelect.Count)];
             // send media attachment

@@ -1,5 +1,6 @@
 using JsonFlatFileDataStore;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using mstdnCats.Models;
 using Telegram.Bot;
 
@@ -7,7 +8,7 @@ namespace mstdnCats.Services
 {
     public class RunCheck
     {
-        public static async Task<bool> runAsync(IDocumentCollection<Post> _db, TelegramBotClient _bot, string _tag, ILogger<MastodonBot>? logger, string _instance)
+        public static async Task<bool> runAsync(IMongoCollection<Post> _db, TelegramBotClient _bot, string _tag, ILogger<MastodonBot>? logger, string _instance)
         {
             // Run check
             try

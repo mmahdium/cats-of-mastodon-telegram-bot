@@ -58,7 +58,7 @@ public class MastodonBot
                 case { CallbackQuery: { } callbackQuery }: {
                     if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger,callbackQuery); break;}
 
-                    else {await HandlePostAction.HandleCallbackQuery(callbackQuery, backupDb, bot, logger); break;}
+                    else {await HandlePostAction.HandleCallbackQuery(callbackQuery, db, bot, logger); break;}
                    
                 }
                 default: logger.LogInformation($"Received unhandled update {update.Type}"); break;
@@ -74,7 +74,7 @@ public class MastodonBot
             }
             else if (message.Text == "/backup")
             {
-                await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, backupDb);
+                await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, backupDb, db);
             }
             // Send a message to prompt user to send /start and recieve their cat photo only if its from a telegram user and not a channel
             else if (message.Chat.Type == ChatType.Private)
@@ -84,9 +84,9 @@ public class MastodonBot
         }
 
         // Set a timer to fetch and process posts every 15 minutes
-        _postFetchTimer = new Timer(async _ => await RunCheck.runAsync(backupDb, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
+        _postFetchTimer = new Timer(async _ => await RunCheck.runAsync(db, bot, config.TAG, logger, config.INSTANCE), null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
         // Another timer to automatically backup the DB every 1 hour
-        _backupTimer = new Timer(async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, backupDb), null, TimeSpan.Zero, TimeSpan.FromHours(6));
+        _backupTimer = new Timer(async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, backupDb,db), null, TimeSpan.Zero, TimeSpan.FromHours(6));
         // Keep the bot running
         await Task.Delay(-1);
     }

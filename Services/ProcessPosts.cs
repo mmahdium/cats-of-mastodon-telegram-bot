@@ -1,6 +1,7 @@
 using CatsOfMastodonBot.Models;
 using JsonFlatFileDataStore;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using mstdnCats.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
@@ -10,7 +11,7 @@ namespace mstdnCats.Services
 {
     public class ProcessPosts
     {
-        public static async Task<List<MediaAttachment>> checkAndInsertPostsAsync(IDocumentCollection<Post> _db, TelegramBotClient _bot, List<Post> fetchedPosts, ILogger<MastodonBot>? logger)
+        public static async Task<List<MediaAttachment>> checkAndInsertPostsAsync(IMongoCollection<Post> _db, TelegramBotClient _bot, List<Post> fetchedPosts, ILogger<MastodonBot>? logger)
         {
             var config = ConfigData.fetchData();
 
