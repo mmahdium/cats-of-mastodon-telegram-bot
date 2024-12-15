@@ -1,5 +1,6 @@
 using JsonFlatFileDataStore;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using mstdnCats.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -10,7 +11,7 @@ namespace CatsOfMastodonBot.Services
 {
     public class HandleStartMessage
     {
-        public static async Task HandleStartMessageAsync(Message message, TelegramBotClient _bot, IDocumentCollection<Post> _db, ILogger<MastodonBot>? logger, CallbackQuery callbackQuery = null)
+        public static async Task HandleStartMessageAsync(Message message, TelegramBotClient _bot, IMongoCollection<Post> _db, ILogger<MastodonBot>? logger, CallbackQuery callbackQuery = null)
         {
             logger?.LogInformation("Start message received, trigger source: " + (callbackQuery != null ? "Callback" : "Start command"));
 

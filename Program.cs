@@ -21,6 +21,7 @@ public class MastodonBot
         });
         var logger = loggerFactory.CreateLogger<MastodonBot>();
 
+        // Read environment variables
         var config = ConfigData.fetchData();
         if (config==null)
         {
@@ -29,7 +30,6 @@ public class MastodonBot
         }
         
         // Setup DB
-        Console.WriteLine("DB name: " + config.DB_NAME);
         var backupDb = await DbInitializer.SetupJsonDb(config.DB_NAME);
         if (backupDb == null)
         {
@@ -40,7 +40,6 @@ public class MastodonBot
         logger.LogInformation("DB setup done");
 
         // Setup bot
-
         var bot = new TelegramBotClient(config.BOT_TOKEN);
 
         var me = await bot.GetMe();
@@ -57,7 +56,7 @@ public class MastodonBot
             switch (update)
             {
                 case { CallbackQuery: { } callbackQuery }: {
-                    if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, backupDb, logger,callbackQuery); break;}
+                    if(callbackQuery.Data == "new_random"){ await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger,callbackQuery); break;}
 
                     else {await HandlePostAction.HandleCallbackQuery(callbackQuery, backupDb, bot, logger); break;}
                    
@@ -69,9 +68,9 @@ public class MastodonBot
         // Handle bot messages
         async Task OnMessage(Message message, UpdateType type)
         {
-            if (message.Text == "/start")
+            if (message.Text == "/start" && message.Chat.Type == ChatType.Private)
             {
-                await HandleStartMessage.HandleStartMessageAsync(message,bot, backupDb, logger);
+                await HandleStartMessage.HandleStartMessageAsync(message,bot, db, logger);
             }
             else if (message.Text == "/backup")
             {
@@ -80,7 +79,7 @@ public class MastodonBot
             // Send a message to prompt user to send /start and recieve their cat photo only if its from a telegram user and not a channel
             else if (message.Chat.Type == ChatType.Private)
             {
-                await HandleStartMessage.HandleStartMessageAsync(message, bot, backupDb, logger);
+                await HandleStartMessage.HandleStartMessageAsync(message, bot, db, logger);
             }
         }
 

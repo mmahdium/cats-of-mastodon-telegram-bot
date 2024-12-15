@@ -13,8 +13,8 @@ public class HandleDbBackup
     {
         logger?.LogInformation("Backup requested");
         
-        await using Stream stream = System.IO.File.OpenRead("./" + dbname+".json");
-        var message = await _bot.SendDocument(adminId, document: InputFile.FromStream(stream, dbname+".json"),
+        await using Stream stream = System.IO.File.OpenRead("./data/" + dbname+"_BK.json");
+        var message = await _bot.SendDocument(adminId, document: InputFile.FromStream(stream, dbname+"_BK.json"),
             caption: "Backup of " + dbname + "\nCreated at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss" + "\nCurrent post count: " + _db.AsQueryable().Count()), parseMode: ParseMode.Html);
 
         logger?.LogInformation("Backup sent");

@@ -14,7 +14,7 @@ namespace mstdnCats.Services
             try
             {
                 // Initialize Backup DB
-                var store = new DataStore($"{_dbname + "_BK"}.json", minifyJson: true);
+                var store = new DataStore($"./data/{_dbname + "_BK"}.json", minifyJson: true);
                 collection = store.GetCollection<Post>();
             }
             catch
@@ -26,7 +26,7 @@ namespace mstdnCats.Services
             return Task.FromResult(collection);
         }
 
-        public static Task<IMongoDatabase> SetupDb(string mongoDbConnectionString, string dbName)
+        public static Task<IMongoCollection<Post>> SetupDb(string mongoDbConnectionString, string dbName)
         {
             if (mongoDbConnectionString == null)
             {
@@ -36,7 +36,7 @@ namespace mstdnCats.Services
             try
             {
                 var client = new MongoClient(mongoDbConnectionString);
-                var database = client.GetDatabase(dbName);
+                var database = client.GetDatabase(dbName).GetCollection<Post>("posts");
                 return Task.FromResult(database);
             }
             catch (Exception ex)
