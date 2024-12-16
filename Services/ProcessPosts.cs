@@ -1,6 +1,7 @@
 using CatsOfMastodonBot.Models;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using mstdnCats.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
@@ -16,9 +17,9 @@ public class ProcessPosts
         var config = ConfigData.fetchData();
 
         // Get existing posts
-        var existingPosts = _db.AsQueryable().Select(x => x.mstdnPostId).ToArray();
+        var existingPosts = await _db.AsQueryable().Select(x => x.mstdnPostId).ToListAsync();
         logger?.LogInformation(
-            $"Recieved posts to proccess: {fetchedPosts.Count} - total existing posts: {existingPosts.Length}");
+            $"Recieved posts to proccess: {fetchedPosts.Count} - total existing posts: {existingPosts.Count}");
         var newPosts = 0;
         // Process posts
         List<Post> validPosts = new();

@@ -15,15 +15,15 @@ public class HandleDbBackup
         string adminId, IMongoCollection<Post> _db)
     {
         logger?.LogInformation("Backup requested");
-        
-        var json = _db.Find(new BsonDocument()).ToList().ToJson();
+
+        var json = (await _db.Find(new BsonDocument()).ToListAsync()).ToJson();
 
         var bytes = Encoding.UTF8.GetBytes(json);
         var stream = new MemoryStream(bytes);
 
         await _bot.SendDocument(adminId, InputFile.FromStream(stream, "backup.json"),
             "Backup of your collection\nCreated at " +
-            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss" + "\nCurrent post count: " + _db.CountDocuments(new BsonDocument())),
+            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss" + "\nCurrent post count: " + _db.CountDocumentsAsync(new BsonDocument())),
             ParseMode.Html);
         logger?.LogInformation("Backup sent");
     }
