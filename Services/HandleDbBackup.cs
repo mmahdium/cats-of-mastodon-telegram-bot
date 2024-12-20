@@ -16,6 +16,7 @@ public class HandleDbBackup
     {
         logger?.LogInformation("Backup requested");
 
+        try{
         var json = (await _db.Find(new BsonDocument()).ToListAsync()).ToJson();
 
         var bytes = Encoding.UTF8.GetBytes(json);
@@ -26,5 +27,9 @@ public class HandleDbBackup
             DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss" + "\nCurrent post count: " + _db.CountDocumentsAsync(new BsonDocument())),
             ParseMode.Html);
         logger?.LogInformation("Backup sent");
+        }
+        catch(Exception ex){
+            logger?.LogError(ex,"Unable to backup database");
+        }
     }
 }

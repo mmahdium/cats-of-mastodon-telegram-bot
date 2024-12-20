@@ -5,3 +5,4 @@ obj/
 *.json
 .env
 data/
+Folder.DotSettings.user
