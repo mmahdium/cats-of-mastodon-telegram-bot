@@ -17,16 +17,14 @@ public class HandleDbBackup
         logger?.LogInformation("Backup requested");
 
         try{
-        var json = (await _db.Find(new BsonDocument()).ToListAsync()).ToJson();
-
-        var bytes = Encoding.UTF8.GetBytes(json);
-        var stream = new MemoryStream(bytes);
-
-        await _bot.SendDocument(adminId, InputFile.FromStream(stream, "backup.json"),
-            "Backup of your collection\nCreated at " +
-            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss" + "\nCurrent post count: " + _db.CountDocumentsAsync(new BsonDocument())),
-            ParseMode.Html);
-        logger?.LogInformation("Backup sent");
+            var json = (await _db.Find(new BsonDocument()).ToListAsync()).ToJson();
+            var bytes = Encoding.UTF8.GetBytes(json);
+            var stream = new MemoryStream(bytes);
+            var postCount = await _db.CountDocumentsAsync(new BsonDocument());
+            var caption =
+                $"Backup of the database {dbname}<br>Created at {DateTime.Now:yyyy-MM-dd HH:mm:ss}<br>Current post count: {postCount}";
+            await _bot.SendDocument(adminId, InputFile.FromStream(stream, "backup.json"), caption, ParseMode.Html);
+            logger?.LogInformation("Backup sent");
         }
         catch(Exception ex){
             logger?.LogError(ex,"Unable to backup database");
