@@ -22,8 +22,8 @@ public class HandleDbBackup
             var stream = new MemoryStream(bytes);
             var postCount = await _db.CountDocumentsAsync(new BsonDocument());
             var caption =
-                $"Backup of the database {dbname}<br>Created at {DateTime.Now:yyyy-MM-dd HH:mm:ss}<br>Current post count: {postCount}";
-            await _bot.SendDocument(adminId, InputFile.FromStream(stream, "backup.json"), caption, ParseMode.Html);
+                $"Backup of the database: {dbname}\nCreated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}\nCurrent post count: {postCount}";
+            await _bot.SendDocument(adminId, InputFile.FromStream(stream, "backup.json"), caption);
             logger?.LogInformation("Backup sent");
         }
         catch(Exception ex){

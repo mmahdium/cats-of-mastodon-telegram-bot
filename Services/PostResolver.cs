@@ -15,9 +15,10 @@ public sealed class PostResolver
         var response = await _httpClient.GetAsync(requestUrl);
 
         // Print out ratelimit info
-        logger?.LogInformation("Remaining requests: " +
-                               response.Headers.GetValues("X-RateLimit-Remaining").First() + "time to reset: " +
-                               response.Headers.GetValues("X-RateLimit-Reset").First());
+        var remainingTime = int.Parse(response.Headers.GetValues("X-RateLimit-Remaining").First());
+        var resetTime = DateTime.Parse(response.Headers.GetValues("X-RateLimit-Reset").First());
+        var diff = resetTime - DateTime.UtcNow;
+        logger?.LogInformation($"Remaining requests: {remainingTime}, ratelimit reset in {diff.Hours} hours {diff.Minutes} minutes {diff.Seconds} seconds");
 
         // Check if response is ok
         if (

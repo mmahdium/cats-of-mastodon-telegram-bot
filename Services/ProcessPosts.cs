@@ -48,7 +48,11 @@ public class ProcessPosts
             }
 
         // Insert post
-        await _db.InsertManyAsync(validPosts);
+        if (validPosts.Count != 0)
+        {
+            await _db.InsertManyAsync(validPosts);
+        }
+
         logger?.LogInformation(
             $"Proccesing done, stats: received {fetchedPosts.Count} posts, inserted and sent {newPosts} new posts.");
 
