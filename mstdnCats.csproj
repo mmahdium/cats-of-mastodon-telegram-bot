@@ -15,4 +15,11 @@
         <PackageReference Include="Telegram.Bot" Version="22.2.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Web\wwwroot\" />
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Web\wwwroot\index.html" />
+    </ItemGroup>
+
 </Project>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cats of Mastodon!</title><style>
+    body {
+        font-family: 'Comic Neue', cursive;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        margin: 0;
+        overflow-x: hidden;
+    }
+
+    .mastodon-title {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+
+    .welcome-message {
+        margin-bottom: 20px;
+        font-size: 1.2em;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .welcome-message span {
+        font-size: 1.5em;
+    }
+
+    .post-container {
+        background-color: #282828;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        transition: transform 0.2s ease-in-out;
+        margin-bottom: 20px;
+    }
+
+    .post-container:hover {
+        transform: scale(1.02);
+    }
+
+    .post-title-inner {
+        margin-bottom: 10px;
+        font-size: 1.2em;
+    }
+
+    .user-name {
+        color: #ffb347;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .cat-text {
+        color: #bbdefb;
+        font-style: italic;
+    }
+
+    .post-image {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        object-fit: cover;
+        max-height: 500px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        transition: opacity 0.3s ease;
+    }
+
+    .post-image.loading {
+        opacity: 0;
+    }
+
+    .image-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .image-loading-spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #6364ff;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+    }
+
+    .post-image.loading + .image-loading-spinner {
+        display: block;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .mastodon-button,
+    .neutral-button {
+        background-color: #404040;
+        color: #e0e0e0;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        width: 100%;
+        box-sizing: border-box;
+        transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+        font-weight: 500;
+    }
+
+    .mastodon-button {
+        background-color: #6364ff;
+    }
+
+    .mastodon-button:hover {
+        background-color: #5253e0;
+        transform: scale(1.03);
+    }
+
+    .neutral-button:hover {
+        background-color: #505050;
+        transform: scale(1.03);
+    }
+
+    .loading-spinner {
+        display: none;
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #6364ff;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+
+    .post-container.loading .loading-spinner {
+        display: block;
+    }
+
+    .post-container.loading .post-image,
+    .post-container.loading .button-container,
+    .post-container.loading .post-title-inner {
+        display: none;
+    }
+
+    .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        font-size: 0.8em;
+        color: #909090;
+        width: 90%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .footer a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .footer a:hover {
+        text-decoration: underline;
+    }
+
+    .footer-button {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<h2 class="mastodon-title">Cats of Mastodon!</h2>
+<p class="welcome-message">Welcome to Daily Catventures! Get your daily dose of purr-fectly adorable feline fun! <span>✨</span><br>Posts gathered across Mastodon 🤝</p>
+
+<div class="post-container">
+    <div class="post-content" style="display: none;">
+        <div class="post-title-inner">
+            <span class="user-name"></span><span class="cat-text">'s cat!</span>
+        </div>
+        <div class="image-container">
+            <img class="post-image" src="" alt="Cat Photo">
+            <div class="image-loading-spinner"></div>
+        </div>
+        <div class="button-container">
+            <a class="mastodon-button" href="" target="_blank">View on Mastodon</a>
+            <button class="neutral-button" onclick="loadNewPost()">Show me another cat!</button>
+        </div>
+    </div>
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="footer">
+    <span>© 2024 Mahdium</span>
+    <a href="https://mahdium.ir" class="footer-button">mahdium.ir</a>
+    <a href="https://gitlab.com/mahdium/cats-of-mastodon-telegram-bot" class="footer-button">Source Code</a>
+</div>
+<script>
+    const postContainer = document.querySelector('.post-container');
+    const postContent = document.querySelector('.post-content');
+    const userNameSpan = document.querySelector('.post-content .user-name');
+    const postImage = document.querySelector('.post-content .post-image');
+    const mastodonLink = document.querySelector('.post-content .mastodon-button');
+    const imageLoadingSpinner = document.querySelector('.image-container .image-loading-spinner');
+
+    function loadNewPost() {
+        postContainer.classList.add('loading');
+        postContent.style.display = 'none';
+        postImage.classList.add('loading');
+
+        fetch('/api/gimme')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                postContainer.classList.remove('loading');
+                postContent.style.display = 'block';
+
+                if (!data || !data.account || !data.media_attachments || data.media_attachments.length === 0) {
+                    console.error("Invalid API response format:", data);
+                    alert("Invalid data received from the server.");
+                    postImage.classList.remove('loading');
+                    return;
+                }
+
+                userNameSpan.textContent = data.account.display_name;
+
+                let imageUrl = data.media_attachments[0].remote_url;
+                if (imageUrl) {
+                    imageUrl = imageUrl.replace('/original/', '/small/');
+                } else if (data.media_attachments[0].PreviewUrl) {
+                    imageUrl = data.media_attachments[0].PreviewUrl;
+                } else {
+                    console.warn("No RemoteUrl or PreviewUrl found, using placeholder");
+                    postImage.src = "placeholder-no-image.png";
+                    postImage.classList.remove('loading');
+                    return;
+                }
+
+                postImage.onload = () => {
+                    postImage.classList.remove('loading');
+                };
+
+                postImage.onerror = () => {
+                    console.error("Error loading image:", imageUrl);
+                    postImage.src = "placeholder-error.png";
+                    postImage.classList.remove('loading');
+                };
+
+                postImage.src = imageUrl;
+                mastodonLink.href = data.Url;
+            })
+            .catch(error => {
+                postContainer.classList.remove('loading');
+                postImage.classList.remove('loading');
+                console.error("Error fetching data:", error);
+                alert("Failed to load a new post. Please try again later.");
+            });
+    }
+
+    loadNewPost();
+</script>
+</body>
+</html>

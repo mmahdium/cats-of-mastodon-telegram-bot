@@ -29,7 +29,7 @@ public class Account
 }
 
 public class MediaAttachment
-{
+{   
     [JsonPropertyName("id")] public required string MediaId { get; set; }
     [JsonPropertyName("type")] public required string Type { get; set; }
     [JsonPropertyName("url")] public required string Url { get; set; }
