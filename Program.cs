@@ -45,7 +45,7 @@ public class MastodonBot
             })
             .Build();
 
-        await host.RunAsync();
+        
         
         // Setup bot
         var bot = new TelegramBotClient(config.BOT_TOKEN);
@@ -110,6 +110,6 @@ public class MastodonBot
             new Timer(
                 async _ => await HandleDbBackup.HandleDbBackupAsync(bot, logger, config.DB_NAME, config.ADMIN_NUMID, db), null, TimeSpan.Zero, TimeSpan.FromHours(6));
         // Keep the bot running
-        await Task.Delay(-1);
+        await host.RunAsync();
     }
 }
