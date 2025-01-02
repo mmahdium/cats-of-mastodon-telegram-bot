@@ -19,10 +19,11 @@ public class ConfigData
         var adminNumId = DotNetEnv.Env.GetString("ADMIN_NUMID") ?? Environment.GetEnvironmentVariable("ADMIN_NUMID");
         var instance = DotNetEnv.Env.GetString("CUSTOM_INSTANCE") ??
                        Environment.GetEnvironmentVariable("CUSTOM_INSTANCE") ?? "https://haminoa.net";
+        var socksProxy = DotNetEnv.Env.GetString("SOCKS_PROXY") ?? Environment.GetEnvironmentVariable("SOCKS_PROXY") ?? String.Empty;
 
         // Check if any of the values are still null or empty
         if (string.IsNullOrEmpty(botToken) || string.IsNullOrEmpty(tag)
-                                           || string.IsNullOrEmpty(channelNumId) || string.IsNullOrEmpty(adminNumId))
+                                           || string.IsNullOrEmpty(channelNumId) || string.IsNullOrEmpty(adminNumId) || string.IsNullOrEmpty(mongoDbConnectionString))
             return null; // Failure if any are missing
 
         // If all required variables are present, assign to the config
@@ -34,7 +35,8 @@ public class ConfigData
             TAG = tag,
             CHANNEL_NUMID = channelNumId,
             ADMIN_NUMID = adminNumId,
-            INSTANCE = instance
+            INSTANCE = instance,
+            SOCKS_PROXY = socksProxy
         };
 
         return config; // Success
@@ -49,5 +51,6 @@ public class ConfigData
         public string ADMIN_NUMID { get; set; }
         public string INSTANCE { get; set; }
         public string MONGODB_CONNECTION_STRING { get; set; }
+        public string SOCKS_PROXY { get; set; }
     }
 }

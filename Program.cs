@@ -1,4 +1,5 @@
-﻿using CatsOfMastodonBot.Models;
+﻿using System.Net;
+using CatsOfMastodonBot.Models;
 using CatsOfMastodonBot.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -48,7 +49,21 @@ public class MastodonBot
         
         
         // Setup bot
-        var bot = new TelegramBotClient(config.BOT_TOKEN);
+        TelegramBotClient bot;
+        if (!String.IsNullOrEmpty(config.SOCKS_PROXY))
+        {
+            WebProxy proxy = new (config.SOCKS_PROXY);
+
+            HttpClient httpClient = new (
+                new SocketsHttpHandler { Proxy = proxy, UseProxy = true }
+            );
+
+            bot = new TelegramBotClient(config.BOT_TOKEN, httpClient);
+        }
+        else
+        {
+            bot = new TelegramBotClient(config.BOT_TOKEN);
+        }
 
         var me = await bot.GetMe();
         await bot.DropPendingUpdates();

@@ -6,3 +6,4 @@ obj/
 .env
 data/
 Folder.DotSettings.user
+docker-compose.yaml
