@@ -1,33 +1,33 @@
-# name: release
-# on:
-#   push:
-#     branches: [ "main" ]
-#   pull_request:
-#     branches: [ "main" ]
+name: release
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-# env:
-#   ASPNETCORE_ENVIRONMENT: Production
+env:
+  ASPNETCORE_ENVIRONMENT: Production
 
-# jobs:
-#   release:
-#     name: check and build
-#     runs-on: g7s
-#     steps:
-#       - uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0 # all history for all branches and tags
-#       - name: Setup .NET Core
-#         uses: actions/setup-dotnet@v4
-#         with:
-#           dotnet-version: 8.0.x
-#       - name: Install telegram bot library
-#         run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
-#       - name: dotnet restore
-#         run: dotnet restore
-#       - name: dotnet build
-#         run: dotnet build --no-restore -c Release
-#       - name: dotnet publish
-#         run: |
-#           pushd src
-#           dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableCompressionInSingleFile=true
-#           popd          
+jobs:
+  release:
+    name: check and build
+    runs-on: g7s
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # all history for all branches and tags
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install telegram bot library
+        run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
+      - name: dotnet restore
+        run: dotnet restore
+      - name: dotnet build
+        run: dotnet build --no-restore -c Release
+      - name: dotnet publish
+        run: |
+          pushd src
+          dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableCompressionInSingleFile=true
+          popd
