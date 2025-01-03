@@ -11,7 +11,7 @@ env:
 jobs:
   release:
     name: check and build
-    runs-on: g7s
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
