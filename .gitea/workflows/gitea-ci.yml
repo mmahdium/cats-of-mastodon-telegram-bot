@@ -44,11 +44,7 @@ jobs:
         with:
           context: .
           push: true
-<<<<<<< HEAD
-          tags: "git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot${{gitea.sha}},git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot:latest"
-=======
-          tags: tags: "git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot${{gitea.sha}},git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot:latest"
->>>>>>> fdc5ee9728343b2a78ae9a0275c53824d9336f91
+          tags: git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot${{gitea.sha}},git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=user/app:latest
           cache-to: type=inline
