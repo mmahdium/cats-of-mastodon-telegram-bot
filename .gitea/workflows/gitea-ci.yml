@@ -24,13 +24,6 @@ jobs:
           registry: git.mahdium.ir
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-
-      - name: Cache for Docker
-        uses: actions/cache@v4
-        with:
-          path: image-cache
-          key: ${{ runner.os }}-image-cache-${{ github.ref }}-${{ github.sha }}
-
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v4
@@ -42,6 +35,4 @@ jobs:
           context: .
           push: true
           tags: git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot${{gitea.sha}},git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot:latest
-          labels: ${{ steps.meta.outputs.labels  }}
-          cache-from: type=local,src=image-cache
-          cache-to: type=local,dest=image-cache
+          #labels: ${{ steps.meta.outputs.labels  }}
