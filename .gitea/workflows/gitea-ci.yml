@@ -24,15 +24,15 @@ jobs:
           registry: git.mahdium.ir
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-      - name: Cache Docker layers
-        id: cache-layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.ref }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ github.ref }}-
-            ${{ runner.os }}-buildx-
+      # - name: Cache Docker layers
+      #   id: cache-layers
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: /tmp/.buildx-cache
+      #     key: ${{ runner.os }}-buildx-${{ github.ref }}-${{ github.sha }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-buildx-${{ github.ref }}-
+      #       ${{ runner.os }}-buildx-
 
       - name: Extract Docker metadata
         id: meta
@@ -46,5 +46,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: type=registry,ref=user/app:latest
+          cache-to: type=inline
