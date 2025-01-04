@@ -37,7 +37,7 @@ jobs:
         with:
           images: git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
