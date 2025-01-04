@@ -29,7 +29,7 @@ jobs:
       - name: Create tarball
         run: tar -czvf publish.tar.gz -C bin/Release/net9.0/linux-x64/publish/ .
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: publish-tarball
           path: publish.tar.gz
@@ -38,7 +38,6 @@ jobs:
   docker:
     name: Build and push Docker image
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - uses: actions/checkout@v4
       - name: Setup Docker Buildx
