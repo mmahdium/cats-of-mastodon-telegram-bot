@@ -36,12 +36,10 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot
-      - name: Build and push Docker image
+      - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
-          push: true
-          # tags: git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot${{gitea.sha}},git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot:latest
-          # labels: ${{ steps.meta.outputs.labels  }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+            context: .
+            push: true
+            tags: |
+                git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot:latest
