@@ -14,14 +14,12 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
       packages: write
-      attestations: write
-      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
@@ -33,10 +31,12 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot
-      - name: Build and push
-        uses: docker/build-push-action@v5
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
         with:
-            context: .
-            push: true
-            tags: |
-                git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot:latest
+          context: .
+          push: true
+          # tags: git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot${{gitea.sha}},git.mahdium.ir/mahdium/cats-of-mastodon-telegram-bot:latest
+          # labels: ${{ steps.meta.outputs.labels  }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
