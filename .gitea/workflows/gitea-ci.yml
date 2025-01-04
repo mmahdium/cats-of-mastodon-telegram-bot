@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0 # all history for all branches and tags
       - name: Install dependencies and .NET sdk
-        run: sudo apt-get update && sudo apt-get install -y tar dotnet-sdk-9.0
+        run: sudo add-apt-repository ppa:dotnet/backports && sudo apt-get update && sudo apt-get install -y tar dotnet-sdk-9.0
       - name: Install telegram bot library
         run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
       - name: dotnet publish
