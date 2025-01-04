@@ -18,10 +18,15 @@ public class HandleStartMessage
                                (callbackQuery != null ? "Callback" : "Start command"));
 
         // choose all media attachments that are approved
-        var mediaAttachmentsToSelect = await _db.AsQueryable()
-            .Where(post => post.MediaAttachments.Any(media => media.Approved))
-            .ToListAsync();
+        
+        // OLD QUERY
+        // var mediaAttachmentsToSelect = await _db.AsQueryable()
+        //     .Where(post => post.MediaAttachments.Any(media => media.Approved))
+        //     .ToListAsync();
 
+        var filter = Builders<Post>.Filter.ElemMatch(post => post.MediaAttachments, Builders<MediaAttachment>.Filter.Eq(media => media.Approved, true));
+        var mediaAttachmentsToSelect = await _db.Find(filter).ToListAsync();
+        
         // select random approved media attachment
         var selectedMediaAttachment = mediaAttachmentsToSelect[new Random().Next(mediaAttachmentsToSelect.Count)];
         // send media attachment

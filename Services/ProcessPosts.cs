@@ -37,6 +37,7 @@ public class ProcessPosts
                                 $"<a href=\"" + post.Url + "\"> Mastodon </a>", ParseMode.Html
                                 , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.MediaId}").AddButton("Reject", $"reject-{media.MediaId}"));
                             validPosts.Add(post);
+                            newPosts++;
                         }
                         catch (Exception ex)
                         {
@@ -44,7 +45,7 @@ public class ProcessPosts
                                              media.PreviewUrl);
                         }
 
-                newPosts++;
+                
             }
 
         // Insert post

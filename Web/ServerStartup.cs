@@ -1,10 +1,10 @@
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using mstdnCats.Models;
 
 namespace mstdnCats.Services;
@@ -47,11 +47,16 @@ public class ServerStartup
             endpoints.MapGet("/api/gimme", async context =>
             {
                 // Api endpoint
-                // Choose all media attachments that are approved
-                var mediaAttachmentsToSelect = await _db.AsQueryable()
-                    .Where(post => post.MediaAttachments.Any(media => media.Approved))
-                    .ToListAsync();
+                // Measure execution time
+                var stopwatch = Stopwatch.StartNew();
 
+                // Choose all posts media attachments that are approved
+                var filter = Builders<Post>.Filter.ElemMatch(post => post.MediaAttachments, Builders<MediaAttachment>.Filter.Eq(media => media.Approved, true));
+                var mediaAttachmentsToSelect = await _db.Find(filter).ToListAsync();
+
+                // Stop and print execution time
+                stopwatch.Stop();
+                Console.WriteLine($"Query executed in: {stopwatch.ElapsedMilliseconds} ms");
                 // Select random approved media attachment
                 var selectedPost = mediaAttachmentsToSelect[new Random().Next(mediaAttachmentsToSelect.Count)];
                 
