@@ -9,29 +9,6 @@ env:
   ASPNETCORE_ENVIRONMENT: Production
 
 jobs:
-  build:
-    name: Build .NET Application
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # all history for all branches and tags
-      - name: Install dependencies and .NET sdk
-        run: sudo add-apt-repository ppa:dotnet/backports && sudo apt-get update && sudo apt-get install -y tar dotnet-sdk-9.0
-      - name: Install telegram bot library
-        run: dotnet nuget add source https://pkgs.dev.azure.com/tgbots/Telegram.Bot/_packaging/release/nuget/v3/index.json -n Telegram.Bot
-      - name: dotnet publish
-        run: dotnet publish -c Release -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false /p:EnableCompressionInSingleFile=true
-      - name: Create tarball
-        run: tar -czvf publish.tar.gz -C bin/Release/net9.0/linux-x64/publish/ .
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: publish-x86_64-self-contained
-          path: publish.tar.gz
-          compression-level: 9
-
-
   docker:
     name: Build and push Docker image
     runs-on: ubuntu-latest
