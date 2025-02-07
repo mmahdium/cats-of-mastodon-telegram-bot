@@ -261,7 +261,7 @@
                     imageUrl = data.media_attachments[0].PreviewUrl;
                 } else {
                     console.warn("No RemoteUrl or PreviewUrl found, using placeholder");
-                    postImage.src = "placeholder-no-image.png";
+                    postImage.src = "https://s6.uupload.ir/files/a69d5fc9e900cc51_1920_kmnr.png";
                     postImage.classList.remove('loading');
                     return;
                 }
@@ -272,12 +272,12 @@
 
                 postImage.onerror = () => {
                     console.error("Error loading image:", imageUrl);
-                    postImage.src = "placeholder-error.png";
+                    postImage.src = "https://s6.uupload.ir/files/a69d5fc9e900cc51_1920_kmnr.png";
                     postImage.classList.remove('loading');
                 };
 
                 postImage.src = imageUrl;
-                mastodonLink.href = data.Url;
+                mastodonLink.href = data.url;
             })
             .catch(error => {
                 postContainer.classList.remove('loading');
