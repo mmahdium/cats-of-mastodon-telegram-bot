@@ -1,8 +1,8 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim-amd64 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0.1-noble-chiseled-composite AS base
 USER $APP_UID
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim-amd64 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0.102-bookworm-slim-amd64 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["mstdnCats.csproj", "./"]
