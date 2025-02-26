@@ -24,15 +24,19 @@ public class HandleStartMessage
         //     .Where(post => post.MediaAttachments.Any(media => media.Approved))
         //     .ToListAsync();
 
-        var filter = Builders<Post>.Filter.ElemMatch(post => post.MediaAttachments, Builders<MediaAttachment>.Filter.Eq(media => media.Approved, true));
-        var mediaAttachmentsToSelect = await _db.Find(filter).ToListAsync();
+        var filter = Builders<Post>.Filter.ElemMatch(post => post.MediaAttachments,
+            Builders<MediaAttachment>.Filter.Eq(media => media.Approved, true));
+        var projection = Builders<Post>.Projection
+            .Include(p => p.Url)
+            .Include(p => p.Account.DisplayName)
+            .Include(p => p.MediaAttachments);
+                
+        var selectedPost = await _db.Aggregate().Match(filter).Project<Post>(projection).Sample(1).FirstOrDefaultAsync();
         
-        // select random approved media attachment
-        var selectedMediaAttachment = mediaAttachmentsToSelect[new Random().Next(mediaAttachmentsToSelect.Count)];
         // send media attachment
         await _bot.SendPhoto(message.Chat.Id,
-            selectedMediaAttachment.MediaAttachments.FirstOrDefault(m => m.Approved == true).Url,
-            $"Here is your cat!🐈\n" + "<a href=\"" + selectedMediaAttachment.Url + "\">" +
+            selectedPost.MediaAttachments.FirstOrDefault(m => m.Approved).RemoteUrl,
+            $"Here is your cat!🐈\n" + "<a href=\"" + selectedPost.Url + "\">" +
             $"View on Mastodon " + " </a>", ParseMode.Html
             , replyMarkup: new InlineKeyboardMarkup()
                 .AddButton(InlineKeyboardButton.WithUrl("Join channel 😺", "https://t.me/catsofmastodon"))

@@ -51,16 +51,23 @@ public class ServerStartup
                 var stopwatch = Stopwatch.StartNew();
 
                 // Choose all posts media attachments that are approved
-                var filter = Builders<Post>.Filter.ElemMatch(post => post.MediaAttachments, Builders<MediaAttachment>.Filter.Eq(media => media.Approved, true));
-                var mediaAttachmentsToSelect = await _db.Find(filter).ToListAsync();
+                var filter = Builders<Post>.Filter.ElemMatch(post => post.MediaAttachments,
+                    Builders<MediaAttachment>.Filter.Eq(media => media.Approved, true));
+                var projection = Builders<Post>.Projection
+                    .Include(p => p.Url)
+                    .Include(p => p.Account.DisplayName)
+                    .Include(p => p.MediaAttachments);
+                
+                var selectedPost = await _db.Aggregate().Match(filter).Project<Post>(projection).Sample(1).FirstOrDefaultAsync();
 
                 // Stop and print execution time
                 stopwatch.Stop();
                 Console.WriteLine($"Query executed in: {stopwatch.ElapsedMilliseconds} ms");
-                // Select random approved media attachment
-                var selectedPost = mediaAttachmentsToSelect[new Random().Next(mediaAttachmentsToSelect.Count)];
                 
                 // Send as JSON
+                selectedPost.MediaAttachments = selectedPost.MediaAttachments
+                    .Where(media => media.Approved)
+                    .ToList();
                 await context.Response.WriteAsJsonAsync(selectedPost);
             });
         });
