@@ -274,6 +274,7 @@
                 postImage.onerror = () => {
                     console.error("Error loading image:", imageUrl);
                     postImage.src = "https://s6.uupload.ir/files/a69d5fc9e900cc51_1920_kmnr.png";
+                    loadNewPost();
                     postImage.classList.remove('loading');
                 };
 
