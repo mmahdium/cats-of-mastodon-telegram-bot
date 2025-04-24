@@ -2,6 +2,7 @@
 using CatsOfMastodonBot.Models;
 using CatsOfMastodonBot.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using mstdnCats.Services;
@@ -41,12 +42,22 @@ public class MastodonBot
                 {
                     options.ListenAnyIP(5005); // Listen on port 5005
                 });
+                webBuilder.ConfigureServices(services =>
+                {
+                    services.AddCors(options =>
+                    {
+                        options.AddDefaultPolicy(options =>
+                        {
+                            options.AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowAnyOrigin();
+                        });
+                    });
+                } );
                 ServerStartup.Serverstartup(db);
                 webBuilder.UseStartup<ServerStartup>();
             })
             .Build();
-
-        
         
         // Setup bot
         TelegramBotClient bot;
