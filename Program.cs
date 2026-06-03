@@ -1,4 +1,5 @@
 ﻿using CatsOfMastodonBot.Models;
+using CatsOfMastodonBot.Repositories;
 using CatsOfMastodonBot.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,9 @@ builder.Services.AddSingleton<Database>();
 builder.Services.AddSingleton<MigrationService>();
 
 builder.Services.AddSingleton<MastodonService>();
+
+builder.Services.AddScoped<PostRepository>();
+builder.Services.AddScoped<MediaAttachmentRepository>();
 /*
 // Telegram Bot
 builder.Services.AddSingleton<ITelegramBotClient>(sp =>
