@@ -26,7 +26,7 @@ public class PeriodicFetchService(IServiceScopeFactory scopeFactory, ILogger<Per
         while (firstRun || await timer.WaitForNextTickAsync(stoppingToken))
         {
             logger.LogInformation("Fetching posts from mastodon");
-            var posts = await mastodonService.FetchCatPostsAsync();
+            var posts = await mastodonService.FetchCatPostsAsync(40);
             logger.LogInformation("Fetched {count} posts", posts.Count);
 
             foreach (var mastodonPostDto in posts)

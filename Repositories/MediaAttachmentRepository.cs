@@ -6,14 +6,16 @@ namespace CatsOfMastodonBot.Repositories;
 
 public class MediaAttachmentRepository(Database database)
 {
-    public async Task ApproveAsync(string mediaId)
+    public async Task<ActionPostResultDto?> ApproveAsync(string mediaId)
     {
         await using var conn = database.CreateConnection();
         await conn.OpenAsync();
 
-        var cmd = conn.CreateCommand();
+        await using var tx = conn.BeginTransaction();
 
-        cmd.CommandText =
+        var updateCmd = conn.CreateCommand();
+        updateCmd.Transaction = tx;
+        updateCmd.CommandText =
             """
             UPDATE MediaAttachments
             SET Approved = 1,
@@ -21,12 +23,97 @@ public class MediaAttachmentRepository(Database database)
             WHERE Id = $id;
             """;
 
-        cmd.Parameters.AddWithValue("$id", mediaId);
+        updateCmd.Parameters.AddWithValue("$id", mediaId);
 
-        await cmd.ExecuteNonQueryAsync();
+        var rowsAffected = await updateCmd.ExecuteNonQueryAsync();
+
+        if (rowsAffected == 0)
+        {
+            await tx.RollbackAsync();
+            return null;
+        }
+
+        var selectCmd = conn.CreateCommand();
+        selectCmd.Transaction = tx;
+        selectCmd.CommandText =
+            """
+            SELECT 
+                p.Id AS PostId,
+                p.Url AS PostUrl,
+                p.AccountId,
+                a.Id AS AccountId,
+                a.Username,
+                a.Acct,
+                a.DisplayName,
+                a.IsBot,
+                a.Url AS AccountUrl,
+                a.AvatarStatic,
+                m.Id AS MediaId,
+                m.Type,
+                m.Url AS MediaUrl,
+                m.PreviewUrl,
+                m.RemoteUrl,
+                m.Approved,
+                m.Rejected,
+                m.PostId AS MediaPostId
+            FROM MediaAttachments m
+            JOIN Posts p ON m.PostId = p.Id
+            JOIN Accounts a ON p.AccountId = a.Id
+            WHERE m.Id = $id;
+            """;
+
+        selectCmd.Parameters.AddWithValue("$id", mediaId);
+
+        await using var reader = await selectCmd.ExecuteReaderAsync();
+
+        if (!await reader.ReadAsync())
+        {
+            await tx.RollbackAsync();
+            return null;
+        }
+
+        var account = new Account
+        {
+            Id = reader.GetString(reader.GetOrdinal("AccountId")),
+            Username = reader.GetString(reader.GetOrdinal("Username")),
+            Acct = reader.GetString(reader.GetOrdinal("Acct")),
+            DisplayName = reader.GetString(reader.GetOrdinal("DisplayName")),
+            IsBot = reader.GetBoolean(reader.GetOrdinal("IsBot")),
+            Url = reader.GetString(reader.GetOrdinal("AccountUrl")),
+            AvatarStatic = reader.GetString(reader.GetOrdinal("AvatarStatic"))
+        };
+
+        var post = new Post
+        {
+            Id = reader.GetString(reader.GetOrdinal("PostId")),
+            Url = reader.GetString(reader.GetOrdinal("PostUrl")),
+            Account = account,
+            MediaAttachments = new List<MediaAttachment>()
+        };
+
+        var media = new MediaAttachment
+        {
+            Id = reader.GetString(reader.GetOrdinal("MediaId")),
+            Type = reader.GetString(reader.GetOrdinal("Type")),
+            Url = reader.GetString(reader.GetOrdinal("MediaUrl")),
+            PreviewUrl = reader.GetString(reader.GetOrdinal("PreviewUrl")),
+            RemoteUrl = reader.GetString(reader.GetOrdinal("RemoteUrl")),
+            Approved = reader.GetBoolean(reader.GetOrdinal("Approved")),
+            Rejected = reader.GetBoolean(reader.GetOrdinal("Rejected")),
+            PostId = reader.IsDBNull(reader.GetOrdinal("MediaPostId"))
+                ? null
+                : reader.GetString(reader.GetOrdinal("MediaPostId")),
+            Post = post
+        };
+
+        post.MediaAttachments.Add(media);
+
+        await tx.CommitAsync();
+
+        return new ActionPostResultDto(post, account, media);
     }
 
-    public async Task RejectAsync(string mediaId)
+    public async Task<int> RejectAsync(string mediaId)
     {
         await using var conn = database.CreateConnection();
         await conn.OpenAsync();
@@ -43,7 +130,7 @@ public class MediaAttachmentRepository(Database database)
 
         cmd.Parameters.AddWithValue("$id", mediaId);
 
-        await cmd.ExecuteNonQueryAsync();
+        return await cmd.ExecuteNonQueryAsync();
     }
 
     public async Task<ApprovedPostResultDto?> GetRandomApprovedAsync()

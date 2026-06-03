@@ -7,3 +7,9 @@ public sealed record ApprovedPostResultDto(
     Account Account,
     MediaAttachment MediaAttachment
 );
+
+public sealed record ActionPostResultDto(
+    Post Post,
+    Account Account,
+    MediaAttachment MediaAttachment
+);

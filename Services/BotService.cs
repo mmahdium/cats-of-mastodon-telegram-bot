@@ -43,16 +43,96 @@ public class BotService
 
     private async Task OnMessage(Message message, UpdateType type)
     {
+        await _botClient.SendMessage(message.Chat.Id, "See you here!🐈\n@catsofmastodon");
     }
 
     private async Task OnUpdate(Update update)
     {
+        switch (update)
+        {
+            case { CallbackQuery: { } callbackQuery }:
+            {
+                if (callbackQuery.Data == null || callbackQuery.Message == null)
+                {
+                    _logger.LogError($"Received null callback query data or message{callbackQuery.Data}");
+                }
+
+                // Approve or reject a post
+                else if (callbackQuery.Data.Contains("approve-") || callbackQuery.Data.Contains("reject-"))
+                {
+                    var parts = callbackQuery.Data.Split('-');
+                    if (parts.Length != 2)
+                    {
+                        _logger.LogError("Invalid callback query data format.");
+                        return;
+                    }
+
+                    var action = parts[0];
+                    var mediaId = parts[1];
+
+                    switch (action)
+                    {
+                        case "approve":
+                            var approveMediaResult = await _mediaAttachmentRepository.ApproveAsync(mediaId);
+                            if (approveMediaResult is not null)
+                            {
+                                await _botClient.SendPhoto(_config.ChannelNumericId,
+                                    approveMediaResult.MediaAttachment.RemoteUrl,
+                                    $"Post from " + $"<a href=\"" + approveMediaResult.Post.Url + "\">" +
+                                    approveMediaResult.Account.DisplayName + " </a>", ParseMode.Html);
+
+                                await _botClient.AnswerCallbackQuery(callbackQuery.Id,
+                                    "Media attachment approved and sent to channel.");
+                                await _botClient.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
+                            }
+                            else
+                            {
+                                await _botClient.AnswerCallbackQuery(callbackQuery.Id,
+                                    "Media attachment was approved before.");
+                                await _botClient.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
+                            }
+
+                            break;
+
+                        case "reject":
+                            var rejectMediaResult = await _mediaAttachmentRepository.RejectAsync(mediaId);
+                            if (rejectMediaResult > 0)
+                            {
+                                await _botClient.AnswerCallbackQuery(callbackQuery.Id,
+                                    "Media attachment rejected successfully ");
+                                await _botClient.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
+                            }
+                            else
+                            {
+                                await _botClient.AnswerCallbackQuery(callbackQuery.Id,
+                                    "Media attachment was rejected before.");
+                                await _botClient.DeleteMessage(callbackQuery.Message.Chat.Id, callbackQuery.Message.Id);
+                            }
+
+                            break;
+                        default:
+                            _logger.LogError($"Invalid action: {action}");
+                            return;
+                    }
+                }
+                /*if (callbackQuery.Data == "new_random")
+                {
+                    await HandleStartMessage.HandleStartMessageAsync(callbackQuery.Message, bot, db, logger,
+                        callbackQuery);
+                    break;
+                }*/
+
+                else
+                {
+                    _logger.LogError($"Received unhandled callback query {callbackQuery.Data}");
+                }
+
+                break;
+            }
+            default: _logger.LogInformation($"Received unhandled update {update.Type}"); break;
+        }
     }
 
-
-    private async Task SendPostToChannel(MastodonPostDto post)
-    {
-    }
 
     public async Task SendPostToAdmin(MastodonPostDto post)
     {
