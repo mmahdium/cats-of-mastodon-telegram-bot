@@ -12,4 +12,5 @@ RUN dotnet publish -r linux-musl-x64 -o /app 'CatsOfMastodonBot.csproj'
 FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-alpine3.23
 WORKDIR /app
 COPY --from=build /app .
-ENTRYPOINT ["/app//CatsOfMastodonBot"]
+COPY --from=build /source/Migrations ./Migrations
+ENTRYPOINT ["/app/CatsOfMastodonBot"]
