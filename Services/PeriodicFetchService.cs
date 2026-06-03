@@ -28,6 +28,7 @@ public class PeriodicFetchService(IServiceScopeFactory scopeFactory, ILogger<Per
             logger.LogInformation("Fetching posts from mastodon");
             var posts = await mastodonService.FetchCatPostsAsync(40);
             logger.LogInformation("Fetched {count} posts", posts.Count);
+            var newlyInserted = 0;
 
             foreach (var mastodonPostDto in posts)
             {
@@ -39,8 +40,13 @@ public class PeriodicFetchService(IServiceScopeFactory scopeFactory, ILogger<Per
                     mastodonPostDto.MediaAttachments.Where(media => media.Type == "image").ToList();
                 var post = MapToPost(mastodonPostDto);
                 if (await postRepository.InsertIfNotExistsAsync(post) > 0)
+                {
                     await botService.SendPostToAdmin(mastodonPostDto);
+                    newlyInserted++;
+                }
             }
+
+            logger.LogInformation("Inserted {newlyInserted} new posts", newlyInserted);
 
             firstRun = false;
         }

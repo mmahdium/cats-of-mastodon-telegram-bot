@@ -1,4 +1,5 @@
-using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CatsOfMastodonBot.DTOs;
 using Microsoft.Extensions.Logging;
 
@@ -35,7 +36,10 @@ public class MastodonService
 
             response.EnsureSuccessStatusCode();
 
-            var posts = await response.Content.ReadFromJsonAsync<List<MastodonPostDto>>();
+            var responseStream = await response.Content.ReadAsStreamAsync();
+            var posts = await JsonSerializer.DeserializeAsync(responseStream,
+                AppJsonSerializerContext.Default.ListMastodonPostDto);
+
             return posts ?? new List<MastodonPostDto>();
         }
         catch (Exception ex)
@@ -44,4 +48,12 @@ public class MastodonService
             return new List<MastodonPostDto>();
         }
     }
+}
+
+/*[JsonSerializable(typeof(MastodonPostDto))]
+[JsonSerializable(typeof(MastodonAccountDto))]
+[JsonSerializable(typeof(MastodonMediaDto))]*/
+[JsonSerializable(typeof(List<MastodonPostDto>))]
+internal partial class AppJsonSerializerContext : JsonSerializerContext
+{
 }
