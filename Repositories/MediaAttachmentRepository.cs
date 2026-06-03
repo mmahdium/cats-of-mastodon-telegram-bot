@@ -25,7 +25,7 @@ public class MediaAttachmentRepository(Database database)
 
         await cmd.ExecuteNonQueryAsync();
     }
-    
+
     public async Task RejectAsync(string mediaId)
     {
         await using var conn = database.CreateConnection();
@@ -45,7 +45,7 @@ public class MediaAttachmentRepository(Database database)
 
         await cmd.ExecuteNonQueryAsync();
     }
-    
+
     public async Task<ApprovedPostResultDto?> GetRandomApprovedAsync()
     {
         await using var conn = database.CreateConnection();

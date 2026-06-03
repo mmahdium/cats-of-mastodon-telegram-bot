@@ -5,7 +5,7 @@ namespace CatsOfMastodonBot.Repositories;
 
 public class PostRepository(Database database)
 {
-    public async Task InsertIfNotExistsAsync(Post post)
+    public async Task<int> InsertIfNotExistsAsync(Post post)
     {
         await using var conn = database.CreateConnection();
         await conn.OpenAsync();
@@ -18,36 +18,36 @@ public class PostRepository(Database database)
         accountCmd.Transaction = tx;
 
         accountCmd.CommandText =
-        """
-        INSERT INTO Accounts
-        (
-            Id,
-            Username,
-            Acct,
-            DisplayName,
-            IsBot,
-            Url,
-            AvatarStatic
-        )
-        VALUES
-        (
-            $id,
-            $username,
-            $acct,
-            $displayName,
-            $isBot,
-            $url,
-            $avatarStatic
-        )
-        ON CONFLICT(Id)
-        DO UPDATE SET
-            Username = excluded.Username,
-            Acct = excluded.Acct,
-            DisplayName = excluded.DisplayName,
-            IsBot = excluded.IsBot,
-            Url = excluded.Url,
-            AvatarStatic = excluded.AvatarStatic;
-        """;
+            """
+            INSERT INTO Accounts
+            (
+                Id,
+                Username,
+                Acct,
+                DisplayName,
+                IsBot,
+                Url,
+                AvatarStatic
+            )
+            VALUES
+            (
+                $id,
+                $username,
+                $acct,
+                $displayName,
+                $isBot,
+                $url,
+                $avatarStatic
+            )
+            ON CONFLICT(Id)
+            DO UPDATE SET
+                Username = excluded.Username,
+                Acct = excluded.Acct,
+                DisplayName = excluded.DisplayName,
+                IsBot = excluded.IsBot,
+                Url = excluded.Url,
+                AvatarStatic = excluded.AvatarStatic;
+            """;
 
         accountCmd.Parameters.AddWithValue("$id", post.Account.Id);
         accountCmd.Parameters.AddWithValue("$username", post.Account.Username);
@@ -65,26 +65,32 @@ public class PostRepository(Database database)
         postCmd.Transaction = tx;
 
         postCmd.CommandText =
-        """
-        INSERT OR IGNORE INTO Posts
-        (
-            Id,
-            Url,
-            AccountId
-        )
-        VALUES
-        (
-            $id,
-            $url,
-            $accountId
-        );
-        """;
+            """
+            INSERT OR IGNORE INTO Posts
+            (
+                Id,
+                Url,
+                AccountId
+            )
+            VALUES
+            (
+                $id,
+                $url,
+                $accountId
+            );
+            """;
 
         postCmd.Parameters.AddWithValue("$id", post.Id);
         postCmd.Parameters.AddWithValue("$url", post.Url);
         postCmd.Parameters.AddWithValue("$accountId", post.Account.Id);
 
-        await postCmd.ExecuteNonQueryAsync();
+        var postRowsAffected = await postCmd.ExecuteNonQueryAsync();
+
+        if (postRowsAffected == 0)
+        {
+            await tx.CommitAsync();
+            return 0;
+        }
 
         // Insert media attachments
         foreach (var media in post.MediaAttachments)
@@ -94,30 +100,30 @@ public class PostRepository(Database database)
             mediaCmd.Transaction = tx;
 
             mediaCmd.CommandText =
-            """
-            INSERT OR IGNORE INTO MediaAttachments
-            (
-                Id,
-                Type,
-                Url,
-                PreviewUrl,
-                RemoteUrl,
-                Approved,
-                Rejected,
-                PostId
-            )
-            VALUES
-            (
-                $id,
-                $type,
-                $url,
-                $previewUrl,
-                $remoteUrl,
-                0,
-                0,
-                $postId
-            );
-            """;
+                """
+                INSERT OR IGNORE INTO MediaAttachments
+                (
+                    Id,
+                    Type,
+                    Url,
+                    PreviewUrl,
+                    RemoteUrl,
+                    Approved,
+                    Rejected,
+                    PostId
+                )
+                VALUES
+                (
+                    $id,
+                    $type,
+                    $url,
+                    $previewUrl,
+                    $remoteUrl,
+                    0,
+                    0,
+                    $postId
+                );
+                """;
 
             mediaCmd.Parameters.AddWithValue("$id", media.Id);
             mediaCmd.Parameters.AddWithValue("$type", media.Type);
@@ -133,5 +139,6 @@ public class PostRepository(Database database)
         }
 
         await tx.CommitAsync();
+        return 1;
     }
 }

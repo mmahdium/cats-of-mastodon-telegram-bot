@@ -1,10 +1,7 @@
-﻿using CatsOfMastodonBot.Models;
-using CatsOfMastodonBot.Repositories;
+﻿using CatsOfMastodonBot.Repositories;
 using CatsOfMastodonBot.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -21,15 +18,12 @@ builder.Services.AddSingleton<MastodonService>();
 
 builder.Services.AddScoped<PostRepository>();
 builder.Services.AddScoped<MediaAttachmentRepository>();
-/*
-// Telegram Bot
-builder.Services.AddSingleton<ITelegramBotClient>(sp =>
-    new TelegramBotClient(builder.Configuration["Telegram:BotToken"]));
 
-// Application Services
-builder.Services.AddScoped<RepositoryService>();
-builder.Services.AddSingleton<TelegramBotService>();
+builder.Services.AddSingleton<BotService>();
+
 builder.Services.AddHostedService<PeriodicFetchService>();
+/*
+
 builder.Services.AddHostedService<TelegramBotService>(sp => sp.GetRequiredService<TelegramBotService>());*/
 
 // Build and run

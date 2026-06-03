@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using CatsOfMastodonBot.DTOs;
-using CatsOfMastodonBot.Models;
 using Microsoft.Extensions.Logging;
 
 namespace CatsOfMastodonBot.Services;
@@ -17,8 +16,8 @@ public class MastodonService
         client.BaseAddress = new Uri(config.MastodonInstance);
         client.DefaultRequestHeaders.Add("User-Agent", "CatsOfMastodonBot");
         client.DefaultRequestHeaders.Add("Accept", "application/json");
-        client.Timeout = TimeSpan.FromSeconds(10);
-        
+        client.Timeout = TimeSpan.FromSeconds(30);
+
         _config = config;
         _httpClient = client;
         _logger = logger;
@@ -30,12 +29,12 @@ public class MastodonService
         {
             if (limit > 40)
                 throw new ArgumentOutOfRangeException(nameof(limit), "Limit cannot be greater than 40");
-            
+
             var response = await _httpClient.GetAsync(
                 $"/api/v1/timelines/tag/catsofmastodon?limit=" + limit);
-            
+
             response.EnsureSuccessStatusCode();
-            
+
             var posts = await response.Content.ReadFromJsonAsync<List<MastodonPostDto>>();
             return posts ?? new List<MastodonPostDto>();
         }

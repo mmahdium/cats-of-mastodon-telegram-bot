@@ -1,3 +1,5 @@
+using DotNetEnv;
+
 namespace CatsOfMastodonBot.Services;
 
 public class AppConfig
@@ -14,6 +16,8 @@ public static class AppConfigLoader
 {
     public static AppConfig LoadConfigFromEnv()
     {
+        Env.Load();
+
         var telegramToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         var adminId = Environment.GetEnvironmentVariable("ADMIN_NUMERIC_ID");
         var channelId = Environment.GetEnvironmentVariable("CHANNEL_NUMERIC_ID");
