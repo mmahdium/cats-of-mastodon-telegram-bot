@@ -3,6 +3,7 @@ using CatsOfMastodonBot.DTOs;
 using CatsOfMastodonBot.Repositories;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -39,10 +40,29 @@ public class BotService
         _botClient.DropPendingUpdates();
         _botClient.OnMessage += OnMessage;
         _botClient.OnUpdate += OnUpdate;
+        _botClient.OnError += OnError;
     }
 
     private async Task OnMessage(Message message, UpdateType type)
     {
+        if (!message.Chat.IsDirectMessages) return;
+        if (message.Text is not null && message.Chat.Id.ToString() == _config.AdminNumericId &&
+            message.Text.Contains("/getdangling"))
+        {
+            var danglingPost = await _mediaAttachmentRepository.GetRandomDanglingAsync();
+
+            if (danglingPost == null)
+            {
+                await _botClient.SendMessage(_config.AdminNumericId, "No dangling posts found.");
+                return;
+            }
+
+            await _botClient.SendPhoto(_config.AdminNumericId,
+                danglingPost.MediaAttachment.RemoteUrl,
+                $"Post from " + $"<a href=\"" + danglingPost.Post.Url + "\">" +
+                danglingPost.Account.DisplayName + " </a>", ParseMode.Html);
+        }
+
         await _botClient.SendMessage(message.Chat.Id, "See you here!🐈\n@catsofmastodon");
     }
 
@@ -133,6 +153,11 @@ public class BotService
         }
     }
 
+    private async Task OnError(Exception exception, HandleErrorSource source)
+    {
+        _logger.LogError(exception, "Error while polling updates");
+    }
+
 
     public async Task SendPostToAdmin(MastodonPostDto post)
     {
@@ -141,7 +166,9 @@ public class BotService
             {
                 await _botClient.SendPhoto(_config.AdminNumericId, media.PreviewUrl,
                     $"<a href=\"" + post.Url + "\"> Mastodon </a>", ParseMode.Html
-                    , replyMarkup: new InlineKeyboardMarkup().AddButton("Approve", $"approve-{media.Id}").AddButton("Reject", $"reject-{media.Id}"));
+                    , replyMarkup: new InlineKeyboardMarkup()
+                        .AddButton("Approve", $"approve-{media.Id}")
+                        .AddButton("Reject", $"reject-{media.Id}"));
 
                 _logger.LogInformation("Sent message to admin: " + media.PreviewUrl);
             }
