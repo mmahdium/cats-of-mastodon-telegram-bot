@@ -45,7 +45,7 @@ public class BotService
 
     private async Task OnMessage(Message message, UpdateType type)
     {
-        if (!message.Chat.IsDirectMessages) return;
+        if (message.Chat.Type is not ChatType.Private) return;
         if (message.Text is not null && message.Chat.Id.ToString() == _config.AdminNumericId &&
             message.Text.Contains("/getdangling"))
         {
@@ -59,17 +59,21 @@ public class BotService
                 return;
             }
 
-            await _botClient.SendPhoto(_config.AdminNumericId,
-                danglingPost.MediaAttachment.RemoteUrl,
-                $"Post from " + $"<a href=\"" + danglingPost.Post.Url + "\">" +
-                danglingPost.Account.DisplayName + " </a>", ParseMode.Html);
+            await _botClient.SendPhoto(_config.AdminNumericId, danglingPost.MediaAttachment.PreviewUrl,
+                $"<a href=\"" + danglingPost.Post.Url + "\"> Mastodon </a>", ParseMode.Html
+                , replyMarkup: new InlineKeyboardMarkup()
+                    .AddButton("Approve", $"approve-{danglingPost.MediaAttachment.Id}")
+                    .AddButton("Reject", $"reject-{danglingPost.MediaAttachment.Id}"));
+
             _logger.LogInformation("Sent dangling post to admin.");
         }
-
-        await _botClient.SendMessage(message.Chat.Id, "See you here!🐈\n@catsofmastodon");
-        _logger.LogInformation(
-            "Sent welcome message to ChatId: {ChatId}, FirstName: {FirstName}, LastName: {LastName}, Username: {Username}, MessageText: {MessageText}",
-            message.Chat.Id, message.Chat.FirstName, message.Chat.LastName, message.Chat.Username, message.Text);
+        else
+        {
+            await _botClient.SendMessage(message.Chat.Id, "See you here!🐈\n@catsofmastodon");
+            _logger.LogInformation(
+                "Sent welcome message to ChatId: {ChatId}, FirstName: {FirstName}, LastName: {LastName}, Username: {Username}, MessageText: {MessageText}",
+                message.Chat.Id, message.Chat.FirstName, message.Chat.LastName, message.Chat.Username, message.Text);
+        }
     }
 
     private async Task OnUpdate(Update update)
