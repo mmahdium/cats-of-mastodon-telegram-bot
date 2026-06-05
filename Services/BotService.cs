@@ -49,11 +49,13 @@ public class BotService
         if (message.Text is not null && message.Chat.Id.ToString() == _config.AdminNumericId &&
             message.Text.Contains("/getdangling"))
         {
+            _logger.LogInformation("Received /getdangling command");
             var danglingPost = await _mediaAttachmentRepository.GetRandomDanglingAsync();
 
             if (danglingPost == null)
             {
                 await _botClient.SendMessage(_config.AdminNumericId, "No dangling posts found.");
+                _logger.LogInformation("No dangling posts found.");
                 return;
             }
 
@@ -61,9 +63,13 @@ public class BotService
                 danglingPost.MediaAttachment.RemoteUrl,
                 $"Post from " + $"<a href=\"" + danglingPost.Post.Url + "\">" +
                 danglingPost.Account.DisplayName + " </a>", ParseMode.Html);
+            _logger.LogInformation("Sent dangling post to admin.");
         }
 
         await _botClient.SendMessage(message.Chat.Id, "See you here!🐈\n@catsofmastodon");
+        _logger.LogInformation(
+            "Sent welcome message to ChatId: {ChatId}, FirstName: {FirstName}, LastName: {LastName}, Username: {Username}, MessageText: {MessageText}",
+            message.Chat.Id, message.Chat.FirstName, message.Chat.LastName, message.Chat.Username, message.Text);
     }
 
     private async Task OnUpdate(Update update)
