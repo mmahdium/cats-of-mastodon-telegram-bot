@@ -12,77 +12,79 @@ public class PostRepository(Database database)
 
         await using var tx = conn.BeginTransaction();
 
-        // Upsert account
-        var accountCmd = conn.CreateCommand();
+        // Step 1: Check if account exists by Acct (the stable identifier)
+        var findAccountCmd = conn.CreateCommand();
+        findAccountCmd.Transaction = tx;
+        findAccountCmd.CommandText = "SELECT Id FROM Accounts WHERE Acct = $acct;";
+        findAccountCmd.Parameters.AddWithValue("$acct", post.Account.Acct);
 
-        accountCmd.Transaction = tx;
+        string accountIdToUse;
 
-        accountCmd.CommandText =
-            """
-            INSERT INTO Accounts
-            (
-                Id,
-                Username,
-                Acct,
-                DisplayName,
-                IsBot,
-                Url,
-                AvatarStatic
-            )
-            VALUES
-            (
-                $id,
-                $username,
-                $acct,
-                $displayName,
-                $isBot,
-                $url,
-                $avatarStatic
-            )
-            ON CONFLICT(Id)
-            DO UPDATE SET
-                Username = excluded.Username,
-                Acct = excluded.Acct,
-                DisplayName = excluded.DisplayName,
-                IsBot = excluded.IsBot,
-                Url = excluded.Url,
-                AvatarStatic = excluded.AvatarStatic;
-            """;
+        if (await findAccountCmd.ExecuteScalarAsync() is string existingAccountId)
+        {
+            // Account exists - use the existing ID from database
+            accountIdToUse = existingAccountId;
 
-        accountCmd.Parameters.AddWithValue("$id", post.Account.Id);
-        accountCmd.Parameters.AddWithValue("$username", post.Account.Username);
-        accountCmd.Parameters.AddWithValue("$acct", post.Account.Acct);
-        accountCmd.Parameters.AddWithValue("$displayName", post.Account.DisplayName);
-        accountCmd.Parameters.AddWithValue("$isBot", post.Account.IsBot);
-        accountCmd.Parameters.AddWithValue("$url", post.Account.Url);
-        accountCmd.Parameters.AddWithValue("$avatarStatic", post.Account.AvatarStatic);
+            // Update the account info, but preserve the existing Id
+            var updateAccountCmd = conn.CreateCommand();
+            updateAccountCmd.Transaction = tx;
+            updateAccountCmd.CommandText =
+                """
+                UPDATE Accounts 
+                SET Username = $username,
+                    DisplayName = $displayName,
+                    IsBot = $isBot,
+                    Url = $url,
+                    AvatarStatic = $avatarStatic
+                WHERE Acct = $acct;
+                """;
+            updateAccountCmd.Parameters.AddWithValue("$username", post.Account.Username);
+            updateAccountCmd.Parameters.AddWithValue("$acct", post.Account.Acct);
+            updateAccountCmd.Parameters.AddWithValue("$displayName", post.Account.DisplayName);
+            updateAccountCmd.Parameters.AddWithValue("$isBot", post.Account.IsBot);
+            updateAccountCmd.Parameters.AddWithValue("$url", post.Account.Url);
+            updateAccountCmd.Parameters.AddWithValue("$avatarStatic", post.Account.AvatarStatic);
 
-        await accountCmd.ExecuteNonQueryAsync();
+            await updateAccountCmd.ExecuteNonQueryAsync();
+        }
+        else
+        {
+            // New account - insert with the provided Id
+            accountIdToUse = post.Account.Id;
 
-        // Insert post if missing
+            var insertAccountCmd = conn.CreateCommand();
+            insertAccountCmd.Transaction = tx;
+            insertAccountCmd.CommandText =
+                """
+                INSERT INTO Accounts
+                (Id, Username, Acct, DisplayName, IsBot, Url, AvatarStatic)
+                VALUES
+                ($id, $username, $acct, $displayName, $isBot, $url, $avatarStatic);
+                """;
+            insertAccountCmd.Parameters.AddWithValue("$id", post.Account.Id);
+            insertAccountCmd.Parameters.AddWithValue("$username", post.Account.Username);
+            insertAccountCmd.Parameters.AddWithValue("$acct", post.Account.Acct);
+            insertAccountCmd.Parameters.AddWithValue("$displayName", post.Account.DisplayName);
+            insertAccountCmd.Parameters.AddWithValue("$isBot", post.Account.IsBot);
+            insertAccountCmd.Parameters.AddWithValue("$url", post.Account.Url);
+            insertAccountCmd.Parameters.AddWithValue("$avatarStatic", post.Account.AvatarStatic);
+
+            await insertAccountCmd.ExecuteNonQueryAsync();
+        }
+
+        // Step 2: Insert post using the correct AccountId (from database, not from the incoming data)
         var postCmd = conn.CreateCommand();
-
         postCmd.Transaction = tx;
-
         postCmd.CommandText =
             """
             INSERT OR IGNORE INTO Posts
-            (
-                Id,
-                Url,
-                AccountId
-            )
+            (Id, Url, AccountId)
             VALUES
-            (
-                $id,
-                $url,
-                $accountId
-            );
+            ($id, $url, $accountId);
             """;
-
         postCmd.Parameters.AddWithValue("$id", post.Id);
         postCmd.Parameters.AddWithValue("$url", post.Url);
-        postCmd.Parameters.AddWithValue("$accountId", post.Account.Id);
+        postCmd.Parameters.AddWithValue("$accountId", accountIdToUse); // Use the stable ID
 
         var postRowsAffected = await postCmd.ExecuteNonQueryAsync();
 
@@ -92,47 +94,23 @@ public class PostRepository(Database database)
             return 0;
         }
 
-        // Insert media attachments
+        // Step 3: Insert media attachments
         foreach (var media in post.MediaAttachments)
         {
             var mediaCmd = conn.CreateCommand();
-
             mediaCmd.Transaction = tx;
-
             mediaCmd.CommandText =
                 """
                 INSERT OR IGNORE INTO MediaAttachments
-                (
-                    Id,
-                    Type,
-                    Url,
-                    PreviewUrl,
-                    RemoteUrl,
-                    Approved,
-                    Rejected,
-                    PostId
-                )
+                (Id, Type, Url, PreviewUrl, RemoteUrl, Approved, Rejected, PostId)
                 VALUES
-                (
-                    $id,
-                    $type,
-                    $url,
-                    $previewUrl,
-                    $remoteUrl,
-                    0,
-                    0,
-                    $postId
-                );
+                ($id, $type, $url, $previewUrl, $remoteUrl, 0, 0, $postId);
                 """;
-
             mediaCmd.Parameters.AddWithValue("$id", media.Id);
             mediaCmd.Parameters.AddWithValue("$type", media.Type);
             mediaCmd.Parameters.AddWithValue("$url", media.Url);
             mediaCmd.Parameters.AddWithValue("$previewUrl", media.PreviewUrl);
-            mediaCmd.Parameters.AddWithValue(
-                "$remoteUrl",
-                (object?)media.RemoteUrl ?? DBNull.Value);
-
+            mediaCmd.Parameters.AddWithValue("$remoteUrl", (object?)media.RemoteUrl ?? DBNull.Value);
             mediaCmd.Parameters.AddWithValue("$postId", post.Id);
 
             await mediaCmd.ExecuteNonQueryAsync();

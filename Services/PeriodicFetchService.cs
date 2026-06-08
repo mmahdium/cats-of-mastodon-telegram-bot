@@ -33,16 +33,23 @@ public class PeriodicFetchService(IServiceScopeFactory scopeFactory, ILogger<Per
             foreach (var mastodonPostDto in posts)
             {
                 if (mastodonPostDto.MediaAttachments.Count == 0 ||
-                    mastodonPostDto.MediaAttachments.All(media => media.Type != "image"))
+                    mastodonPostDto.MediaAttachments.All(media => media.Type != "image") || mastodonPostDto.Account.Bot)
                     continue;
 
                 mastodonPostDto.MediaAttachments =
                     mastodonPostDto.MediaAttachments.Where(media => media.Type == "image").ToList();
                 var post = MapToPost(mastodonPostDto);
-                if (await postRepository.InsertIfNotExistsAsync(post) > 0)
+                try
                 {
-                    await botService.SendPostToAdmin(mastodonPostDto);
-                    newlyInserted++;
+                    if (await postRepository.InsertIfNotExistsAsync(post) > 0)
+                    {
+                        await botService.SendPostToAdmin(mastodonPostDto);
+                        newlyInserted++;
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "An error occured while inserting post");
                 }
             }
 
