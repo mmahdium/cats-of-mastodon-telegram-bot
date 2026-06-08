@@ -107,7 +107,7 @@ public class BotService
                             if (approveMediaResult is not null)
                             {
                                 await _botClient.SendPhoto(_config.ChannelNumericId,
-                                    approveMediaResult.MediaAttachment.RemoteUrl,
+                                    approveMediaResult.MediaAttachment.Url,
                                     $"Post from " + $"<a href=\"" + approveMediaResult.Post.Url + "\">" +
                                     approveMediaResult.Account.DisplayName + " </a>", ParseMode.Html);
 
