@@ -24,13 +24,10 @@ public class MastodonService
         _logger = logger;
     }
 
-    public async Task<List<MastodonPostDto>> FetchCatPostsAsync(int limit = 10)
+    public async Task<List<MastodonPostDto>> FetchCatPostsAsync(int limit)
     {
         try
         {
-            if (limit > 40)
-                throw new ArgumentOutOfRangeException(nameof(limit), "Limit cannot be greater than 40");
-
             var response = await _httpClient.GetAsync(
                 $"/api/v1/timelines/tag/catsofmastodon?limit=" + limit);
 

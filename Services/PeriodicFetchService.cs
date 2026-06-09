@@ -7,7 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace CatsOfMastodonBot.Services;
 
-public class PeriodicFetchService(IServiceScopeFactory scopeFactory, ILogger<PeriodicFetchService> logger)
+public class PeriodicFetchService(
+    IServiceScopeFactory scopeFactory,
+    ILogger<PeriodicFetchService> logger,
+    AppConfig config)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -26,7 +29,7 @@ public class PeriodicFetchService(IServiceScopeFactory scopeFactory, ILogger<Per
         while (firstRun || await timer.WaitForNextTickAsync(stoppingToken))
         {
             logger.LogInformation("Fetching posts from mastodon");
-            var posts = await mastodonService.FetchCatPostsAsync(40);
+            var posts = await mastodonService.FetchCatPostsAsync(config.PostsPerRequest);
             logger.LogInformation("Fetched {count} posts", posts.Count);
             var newlyInserted = 0;
 

@@ -10,6 +10,7 @@ public class AppConfig
     public required string ChannelNumericId { get; set; }
     public required string MastodonInstance { get; set; }
     public string? Socks5Proxy { get; set; }
+    public ushort PostsPerRequest { get; set; }
 }
 
 public static class AppConfigLoader
@@ -47,10 +48,17 @@ public static class AppConfigLoader
         }
 
         var socks5Proxy = Environment.GetEnvironmentVariable("SOCKS5_PROXY");
-        // try parse the url to be valid like socks5://tor:9050
         if (!string.IsNullOrEmpty(socks5Proxy))
             if (Uri.TryCreate(socks5Proxy, UriKind.Absolute, out var proxyUri) && proxyUri.Scheme == "socks5")
                 socks5Proxy = proxyUri.ToString();
+
+        ushort postsPerRequestParsed = 10;
+        var postsPerRequest = Environment.GetEnvironmentVariable("POSTS_PER_REQUEST");
+        if (!string.IsNullOrEmpty(postsPerRequest))
+            ushort.TryParse(postsPerRequest, out postsPerRequestParsed);
+        if (postsPerRequestParsed > 40)
+            throw new ArgumentOutOfRangeException(nameof(postsPerRequestParsed),
+                "Posts per request cannot be greater than 40");
 
 
         return new AppConfig
@@ -60,7 +68,8 @@ public static class AppConfigLoader
             ChannelNumericId = channelId,
             DbPath = dbPath,
             MastodonInstance = customInstance ?? "https://haminoa.net",
-            Socks5Proxy = socks5Proxy
+            Socks5Proxy = socks5Proxy,
+            PostsPerRequest = postsPerRequestParsed
         };
     }
 }
